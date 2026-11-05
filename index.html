@@ -555,24 +555,64 @@ cv.addEventListener("pointerup",e=>{const moved=downAt&&Math.hypot(e.clientX-dow
 
 /* ---------- interview ---------- */
 let chatMode="one";
-function selectAgent(a){selected=a;chatMode="one";setMode("one");$("#chatWho").textContent=`${a.name} · ${a.role}`;
+function selectAgent(a){selected=a;a.chat={used:new Set(),turns:0,last:null};chatMode="one";setMode("one");$("#chatWho").textContent=`${a.name} · ${a.role}`;
   $("#msgs").innerHTML="";say(greet(a),a);renderPick();}
 function setMode(m){chatMode=m;$("#m1").classList.toggle("on",m==="one");$("#m2").classList.toggle("on",m==="crowd");
   if(m==="crowd"){$("#chatWho").textContent="The whole crowd";$("#msgs").innerHTML=`<div class="empty">Ask a question — the most supportive, the most opposed and two random people answer.</div>`;}
   else if(!selected){$("#chatWho").textContent="Interview";$("#msgs").innerHTML='<div class="empty">Pick someone on the left (or click a node in the graph).</div>';}
   $("#sugs").innerHTML=["Why do you feel that way?","What would change your mind?","Who influenced you?","How will it affect you personally?","Is the price fair?"].map(s=>`<button class="chip">${s}</button>`).join("");}
 function greet(a){return`Hi, I'm ${esc(a.name.split(" ")[0])} — ${a.role.toLowerCase()}. ${a.bio} About ${TOPIC}? Right now I'm ${moodOf(a.op,a.emo).toLowerCase()}${a.op>.18?", leaning yes":a.op<-.18?", leaning no":", still on the fence"}.`;}
-function answer(a,q){q=q.toLowerCase();const c=CONCERN_TXT[a.concerns[0]],c2=CONCERN_TXT[a.concerns[1]];
-  const open={blunt:"Look, ",warm:"Honestly, ",sarcastic:"Oh, sure — ",analytical:"If I break it down: ",cautious:"Well… ",optimistic:"Okay so, ",contrarian:"Unpopular view, but ",loyal:"For people like me, "}[a.traits[0]]||"";
-  const moved=a.op-a.op0,ev=events.at(-1);
-  if(/why|reason|feel/.test(q))return open+(a.op>.18?`it could ${a.benefit}. I still keep an eye on ${c}, but the upside wins for me.`:a.op<-.18?`${c} and ${c2}. Nobody has explained how ${TOPIC} deals with either, and people like me pay the price first.`:`I can see the upside, but ${c} worries me. I'm waiting for specifics.`);
-  if(/change|convince|mind|persuade/.test(q))return open+(a.op>0?`if it turned out ${c} was badly handled, I'd drop my support quickly.`:`show me a clear plan for ${c} — real numbers, not slogans — and a trial period. Then I'd reconsider.`);
-  if(/who|influenc|follow/.test(q)){const fs=a.following.map(i=>agents[i]).sort((x,y)=>y.inf-x.inf).slice(0,2);
-    return fs.length?open+`I mostly follow ${fs.map(f=>`${esc(f.name)} (${f.role.toLowerCase()})`).join(" and ")}. ${Math.abs(moved)>.15?`Their posts did move me — I started at ${sgn(a.op0)}, now ${sgn(a.op)}.`:"But I mostly made up my own mind."}`:"I don't really follow anyone on this. My own experience is enough.";}
-  if(/news|event|leak|heard/.test(q))return ev?open+`about “${ev.text}” — ${ev.tone>0===a.op>0?"it confirms what I thought":"I'm not sure it changes the basics for me"}.`:"Nothing big has happened yet, honestly.";
-  if(/price|cost|money|pay|cheap|expens|fair/.test(q))return open+(a.concerns.includes("cost")||a.concerns.includes("income")?"money is exactly my sore point. Every extra euro counts in my budget.":`cost matters, but honestly it's not my top worry — ${c} is.`);
-  if(/affect|personal|life|day/.test(q))return open+`as a ${a.role.toLowerCase()}, it's about ${c} day to day. ${a.op>.18?`Best case it would ${a.benefit}.`:"Worst case it adds stress I don't need."}`;
-  return open+`on ${TOPIC}, my score is ${sgn(a.op)} on a −1 to +1 scale. What I keep coming back to is ${c}.`;}
+/* Rule-based interview engine. Each agent remembers what it already said and never repeats a sentence until
+   it has used every variant; concerns rotate per turn; a repeated question is acknowledged; off-topic questions
+   get an honest "I don't follow" instead of a canned opinion. English + a few Polish keywords. */
+const OPEN={blunt:["Look, ","Straight up: ","Simple: ",""],warm:["Honestly, ","I hear you. ","Good question. ",""],
+  sarcastic:["Oh, sure — ","Ha. ","Well, obviously ",""],analytical:["If I break it down: ","Data-wise, ","Two things. ",""],
+  cautious:["Well… ","Hmm. ","Carefully put: ",""],optimistic:["Okay so, ","Love that you asked! ","Bright side: ",""],
+  contrarian:["Unpopular view, but ","Everyone says the opposite, but ","Here's the twist: ",""],loyal:["For people like me, ","Speaking for my people: ","Where I come from, ",""]};
+const INTENTS=[["greet",/^\s*(hi|hello|hey|yo|cze[sś][cć]|hej|siema)\b/],["you",/who are you|about you|yourself|kim jeste/],
+  ["why",/\bwhy\b|reason|feel|dlaczego|czemu/],["change",/change (your|ur) mind|change.*mind|convince|persuade|zmieni|przekona/],
+  ["improve",/improve|better|suggest|\bfix\b|should (they|we|it)|what would you do|what.*(check|czek|test|look at)|ulepsz|popraw|sprawd/],
+  ["who",/influenc|follow|who (do|did|are)|\bkto\b/],["news",/news|event|leak|heard|wiadomo/],
+  ["price",/price|cost|money|\bpay|cheap|expens|fair|\bcen[aey]|koszt|drog|tani/],["likely",/likely|chance|succeed|will it work|percent|odds|szans|uda si/],
+  ["others",/others|everyone|crowd|people|group|\binni\b|ludzie/],["personal",/affect|personal|your life|daily|day to day|wp[łl]yw|dotkn/],
+  ["ack",/^\s*(yes|no|ok|okay|agree|true|right|sure|tak|nie|dobra)\b/]];
+function fresh(a,arr){const u=a.chat.used;let c=arr.filter(x=>!u.has(x));if(!c.length){arr.forEach(x=>u.delete(x));c=arr;}
+  const s=c[Math.floor(Math.random()*c.length)];u.add(s);return s;}
+function answer(a,raw){
+  a.chat??={used:new Set(),turns:0,last:null};const ch=a.chat;ch.turns++;
+  const q=raw.toLowerCase(),cs=a.concerns.map(k=>CONCERN_TXT[k]),c=cs[(ch.turns-1)%cs.length],c2=cs[ch.turns%cs.length];
+  const pos=a.op>.18,neg=a.op<-.18,role=a.role.toLowerCase(),first=esc(a.name.split(" ")[0]),s=history.at(-1);
+  const sup=Math.round(s.sup*100),opp=Math.round(s.opp*100),moved=a.op-a.op0,ev=events.at(-1),pct=Math.round(clamp(50+a.op*40,5,95));
+  const mates=agents.filter(b=>b.group===a.group),gm=mates.reduce((t,b)=>t+b.op,0)/mates.length;
+  const fs=a.following.map(i=>agents[i]).sort((x,y)=>y.inf-x.inf).slice(0,2),names=fs.map(f=>`${esc(f.name)} (${f.role.toLowerCase()})`).join(" and ");
+  const rival=agents.slice().sort((x,y)=>pos?x.op-y.op:y.op-x.op)[0];
+  const shift=Math.abs(moved)>.15?fresh(a,[`Their posts did move me — I started at ${sgn(a.op0)}, now ${sgn(a.op)}.`,`I've shifted from ${sgn(a.op0)} to ${sgn(a.op)} since the debate started.`]):fresh(a,["But I mostly made up my own mind.","Still, my view hasn't moved much."]);
+  const onTopic=KW.some(k=>q.includes(k.toLowerCase()))||/\b(it|this|plan|idea|that|its)\b/.test(q);
+  let intent=(INTENTS.find(([,r])=>r.test(q))||[])[0]||(onTopic?"opinion":"offtopic");
+  const R={
+    greet:[`hi! Ask me anything about ${TOPIC}.`,`hey. Want my take on ${TOPIC}? Go ahead.`,`hello again. Still here, still thinking about ${c}.`],
+    you:[`I'm ${first}, ${role}. ${a.bio} I follow ${a.following.length} people and ${a.followers} follow me.`,`${a.role}, ${a.group} crowd, ${a.traits.join(" and ")}. On this I'm at ${sgn(a.op)}.`],
+    why:pos?[`it could ${a.benefit} — that matters more to me than ${c}.`,`I've seen too many half-measures. This one could actually ${a.benefit}.`,`as a ${role}, I like that it tackles something real. ${cap(c)} is a risk, but a manageable one.`]
+       :neg?[`${c}. Nobody has explained how ${TOPIC} deals with it, and people like me pay first.`,`it feels designed by people who never had to worry about ${c}.`,`between ${c} and ${c2}, I just don't see who it's really for.`]
+       :[`I can see the upside, but ${c} worries me. I'm waiting for specifics.`,`half of me likes it, half of me keeps thinking about ${c}.`,`I'm torn — it could ${a.benefit}, or it could go wrong on ${c}.`],
+    change:pos?[`if it turned out ${c} was badly handled, I'd drop my support quickly.`,`a bad first month. If early users get burned on ${c}, I'm out.`,`if ${esc(rival.name)} (${rival.role.toLowerCase()}) showed me hard numbers on ${c}, I'd listen.`]
+       :[`a clear plan for ${c} — real numbers, not slogans — and a trial period.`,`let people like me test it free first. If ${c} turns out fine, I'll come around.`,`put someone who actually understands ${c2} in charge. Then we'll talk.`,`if ${esc(rival.name)} could answer my question about ${c}, I might move.`],
+    improve:[`deal with ${c} up front — publish how it works before launch.`,`start with a small pilot for ${a.group.toLowerCase()} people like me, then scale.`,`make the first months cheaper or free — that kills half the complaints about ${c}.`,`ask ${rival.role.toLowerCase()}s before deciding; they'll spot problems with ${c2} you won't.`,`check ${c} and ${c2} first. Everything else is detail.`],
+    who:fs.length?[`I mostly follow ${names}. ${shift}`,`${names} — their posts are in my feed every day. ${shift}`]:["I don't really follow anyone on this. My own experience is enough.","Nobody, really. I read, I don't follow."],
+    news:ev?[`about “${ev.text}” — ${ev.tone>0===a.op>0?"it confirms what I thought":"I'm not sure it changes the basics for me"}.`,`I saw “${ev.text}”. ${ev.tone>0?"Good news, if it's true.":"Not great."} It doesn't fix ${c} though.`]:["nothing big has happened yet, honestly.",`no news so far. Everyone's still arguing about ${c}.`],
+    price:a.concerns.some(k=>k==="cost"||k==="income")?[`money is exactly my sore point. Every extra euro counts.`,`for someone like me, price decides everything. ${pos?"If it stays fair, I'm in.":"Right now it doesn't feel fair."}`,`I did the maths. ${pos?"It works for me — barely.":"It doesn't add up for my budget."}`]
+       :[`cost matters, but honestly it's not my top worry — ${c} is.`,`price is fine-ish. ${cap(c)} is what bugs me.`,`I'd pay if ${c} was sorted.`],
+    likely:[`I'd give it maybe ${pct}% to work as promised.`,`right now about ${sup}% of people I see back it. I'd bet on ${s.sup>s.opp?"it going through":"trouble"}.`,`${pct}% — and that depends entirely on ${c}.`],
+    others:[`most ${a.group} people I know sit around ${sgn(gm)} — ${gm>.1?"fairly positive":gm<-.1?"pretty sceptical":"undecided"}.`,`the crowd is split: ${sup}% for, ${opp}% against. I'm ${pos?"with the yes side":neg?"with the no side":"in the middle"}.`,`my circle is louder than the numbers suggest. ${opp>sup?`Lots of anger about ${c}.`:"More excitement than I expected."}`],
+    personal:[`as a ${role}, it's about ${c} day to day. ${pos?`Best case it would ${a.benefit}.`:"Worst case it adds stress I don't need."}`,`${a.bio} So for me ${c} isn't abstract.`,`it lands on my ${c2} first, then on ${c}.`],
+    ack:[`fair enough.${pos?" Glad we're on the same page.":` Still, ${c} bugs me.`}`,`mm-hm. Anything else you want to know?`,`okay. Ask me what would change my mind, if you like.`],
+    opinion:[`on ${TOPIC} I'm at ${sgn(a.op)} on a −1 to +1 scale. What I keep coming back to is ${c}.`,`my take: ${pos?`yes, with an eye on ${c}`:neg?`no, mostly because of ${c}`:`undecided — ${c} is the open question`}.`,`I went from ${sgn(a.op0)} to ${sgn(a.op)}. ${cap(c2)} is what keeps me ${pos?"careful":neg?"against it":"on the fence"}.`],
+    offtopic:[`not sure what you mean by “${esc(raw.slice(0,60))}”. I only know about ${TOPIC} — ask why I feel this way or what I'd improve.`,`that's outside my lane. I'm here to talk about ${TOPIC}.`,`hmm, I don't follow. Ask me about ${TOPIC}: the cost, who influenced me, what would change my mind…`]};
+  const again=ch.last===intent&&!["offtopic","ack","greet"].includes(intent);ch.last=intent;
+  const pre=again?fresh(a,["Like I said — ","Same answer, different words: ","You asked that already, but okay: ","Still the same for me: "]):"";
+  const op=["greet","offtopic","ack"].includes(intent)||again?"":fresh(a,OPEN[a.traits[0]]||[""]);
+  const lead=pre+op,body=fresh(a,R[intent]);
+  return lead+(!lead||/[.!?…]\s$/.test(lead)?cap(body):body);}
 function say(t,a){const m=$("#msgs");m.querySelector(".empty")?.remove();
   m.insertAdjacentHTML("beforeend",a?`<div class="msg ai"><b>${esc(a.name)} · ${a.role}</b>${t}</div>`:`<div class="msg me">${esc(t)}</div>`);m.scrollTop=m.scrollHeight;}
 function sendAsk(text){text=text.trim();if(!text)return;
