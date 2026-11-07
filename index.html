@@ -153,6 +153,20 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
 .recent h4{margin:0 0 8px;font:500 11px var(--mono);letter-spacing:2px;color:var(--mute);text-transform:uppercase}
 .recent .chips{justify-content:flex-start;margin:0}
 .chip small{font-family:var(--mono);color:var(--acc);margin-left:6px}
+.custom{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.custom input[type=text],#crName{flex:1;min-width:180px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 11px;outline:0}
+.bench{max-width:780px;margin:0 auto 18px}
+.bench a{color:var(--text)}
+.tscroll{overflow-x:auto}
+#advOut .list li.adv{align-items:center;flex-wrap:wrap}
+#advOut .list li.adv .hint{white-space:normal;font-family:inherit}
+#advOut .list li.adv>span:first-child{min-width:180px}
+#advOut .list li.adv>span:first-child{flex:1;font-family:inherit;color:var(--text);white-space:normal}
+#advOut .advn{text-align:right;font-family:var(--mono);font-size:12px;color:var(--mute);white-space:nowrap}
+.ai-badge{font:600 10px var(--mono);color:var(--acc-ink);background:var(--acc);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.lang{margin-left:auto;display:flex;gap:4px}
+.lang button{background:none;border:1px solid var(--line);color:var(--mute);border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer}
+.lang button.on{border-color:var(--acc);color:var(--text)}
 @media (max-width:860px){
   .grid{grid-template-columns:1fr}
   .steps{grid-template-columns:repeat(2,1fr)}
@@ -163,31 +177,44 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
 </head>
 <body>
 <div class="wrap">
-  <header><div class="logo" id="home" title="Home">◎</div><b>Swarmcast</b><span>· crowd-simulation forecasting</span></header>
+  <header><div class="logo" id="home" title="Home">◎</div><b>Swarmcast</b><span data-i="tagline">· crowd-simulation forecasting</span><span class="lang"><button data-lang="en">EN</button><button data-lang="pl">PL</button></span></header>
 
   <section id="landing">
     <div class="hero">
-      <div class="eyebrow">Idea in → crowd out</div>
-      <h1>Rehearse the future<br>with a <em>simulated crowd</em></h1>
-      <p class="sub">Describe a product, policy or announcement. Swarmcast builds a population of AI personas, wires them into a social network and lets them argue. Steer it live: drop breaking news, change anyone's mind, boost posts — then read the forecast and interview anyone in the crowd.</p>
+      <div class="eyebrow" data-i="eyebrow">Idea in → crowd out</div>
+      <h1 data-ih="h1">Rehearse the future<br>with a <em>simulated crowd</em></h1>
+      <p class="sub" data-i="sub">Describe a product, policy or announcement. Swarmcast builds a population of AI personas, wires them into a social network and lets them argue. Steer it live: drop breaking news, change anyone's mind, boost posts — then read the forecast and interview anyone in the crowd.</p>
       <div class="composer">
-        <textarea id="idea" maxlength="280" placeholder="e.g. Our city will charge €5 for every car entering the centre on weekdays starting next year."></textarea>
+        <textarea id="idea" maxlength="280" data-iph="ideaPh" placeholder="e.g. Our city will charge €5 for every car entering the centre on weekdays starting next year."></textarea>
         <div class="row">
-          <label class="ctl">Agents <input id="nAgents" type="range" min="20" max="90" value="48"><output id="oAgents">48</output></label>
-          <label class="ctl">Rounds <input id="nRounds" type="range" min="5" max="40" value="20"><output id="oRounds">20</output></label>
+          <label class="ctl"><span data-i="agents">Agents</span> <input id="nAgents" type="range" min="20" max="90" value="48"><output id="oAgents">48</output></label>
+          <label class="ctl"><span data-i="rounds">Rounds</span> <input id="nRounds" type="range" min="5" max="40" value="20"><output id="oRounds">20</output></label>
+          <label class="ctl"><span data-i="crowd">Crowd</span> <select id="mix"></select></label>
+          <button class="btn ghost sm" id="crToggle" type="button" data-i="ownP">+ Own persona</button>
           <span class="spacer"></span>
-          <button class="btn" id="run">Run simulation →</button>
+          <button class="btn" id="run" data-i="run">Run simulation →</button>
         </div>
+        <div class="custom hide" id="customBox"><div class="row">
+          <input id="crName" maxlength="30" data-iph="crPh" placeholder="Your persona type, e.g. Taxi driver">
+          <label class="ctl"><span data-i="leans">Leans</span> <input id="crStance" type="range" min="-100" max="100" value="0"><output id="oStance">0</output></label>
+          <label class="ctl"><span data-i="worry">Main worry</span> <select id="crConcern"></select></label>
+          <label class="ctl"><span data-i="share">Share</span> <input id="crShare" type="range" min="5" max="50" value="15"><output id="oShare">15%</output></label>
+          <button class="btn ghost sm" id="crClear" type="button" data-i="remove">Remove</button>
+        </div><div class="hint" data-i="crHint">Added to the crowd as its own group. Leave the name empty to skip it.</div></div>
       </div>
       <div class="chips" id="examples"></div>
-      <div class="recent hide" id="recent"><h4>Your recent runs</h4><div class="chips" id="recentList"></div></div>
+      <div class="recent hide" id="recent"><h4 data-i="recentH">Your recent runs</h4><div class="chips" id="recentList"></div></div>
     </div>
     <div class="steps">
-      <div class="step"><b>01 IDEA</b>You write the scenario in plain words.</div>
-      <div class="step"><b>02 PERSONAS</b>Each agent gets a role, values and a starting opinion.</div>
-      <div class="step"><b>03 NETWORK</b>They follow, post, reply and sway each other — you can intervene.</div>
-      <div class="step"><b>04 FORECAST</b>Report + one-on-one or whole-crowd interviews.</div>
+      <div class="step"><b data-i="s1b">01 IDEA</b><span data-i="s1">You write the scenario in plain words.</span></div>
+      <div class="step"><b data-i="s2b">02 PERSONAS</b><span data-i="s2">Each agent gets a role, values and a starting opinion.</span></div>
+      <div class="step"><b data-i="s3b">03 NETWORK</b><span data-i="s3">They follow, post, reply and sway each other — you can intervene.</span></div>
+      <div class="step"><b data-i="s4b">04 FORECAST</b><span data-i="s4">Report + one-on-one or whole-crowd interviews.</span></div>
     </div>
+    <div class="card bench"><h3 data-i="benchH">Does it match real votes?</h3>
+      <p class="hint" style="margin-top:0" data-i="benchP">Nine real referendums with known results, typed in as plain ideas. This shows how far a rule-based crowd lands from what people actually voted.</p>
+      <div id="benchOut"></div></div>
+    <div class="row" style="justify-content:center;margin:0 0 30px"><label class="btn ghost sm" style="cursor:pointer"><span data-i="open">Open a saved run (.json)</span><input type="file" id="loadFile" accept=".json,application/json" hidden></label></div>
   </section>
 
   <section id="app">
@@ -195,90 +222,94 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
       <div class="q" id="qText"></div>
       <div class="read" id="readOut"></div>
       <div class="row">
-        <div class="kpis"><div>ROUND <b id="kRound">0</b></div><div>POSTS <b id="kPosts">0</b></div><div>SUPPORT <b id="kSup">0%</b></div><div>MOOD <b id="kMood">0</b></div></div>
+        <div class="kpis"><div><span data-i="kR">ROUND</span> <b id="kRound">0</b></div><div><span data-i="kP">POSTS</span> <b id="kPosts">0</b></div><div><span data-i="kS">SUPPORT</span> <b id="kSup">0%</b></div><div><span data-i="kM">MOOD</span> <b id="kMood">0</b></div></div>
         <div class="prog"><i id="progBar"></i></div>
       </div>
       <div class="toolbar">
         <button class="btn sm" id="pause">Pause</button>
-        <button class="btn ghost sm" id="stepBtn" title="Advance one round">+1 round</button>
-        <button class="btn ghost sm" id="more" title="Keep the debate going">+10 rounds</button>
-        <label class="ctl">Speed <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
-        <button class="btn ghost sm" id="evBtn">📰 Inject event</button>
+        <button class="btn ghost sm" id="stepBtn" data-it="stepT" title="Advance one round" data-i="step1">+1 round</button>
+        <button class="btn ghost sm" id="more" data-it="moreT" title="Keep the debate going" data-i="more10">+10 rounds</button>
+        <label class="ctl"><span data-i="speed">Speed</span> <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+        <button class="btn ghost sm" id="evBtn" data-i="evBtn">📰 Inject event</button>
+        <button class="btn ghost sm hide" id="aiBtn" data-it="aiT" title="Opinion leaders' posts and interview answers written by Claude">AI voices: on</button>
         <span class="spacer"></span>
-        <button class="btn ghost sm" id="share">Copy link</button>
-        <button class="btn ghost sm" id="expMd">Report .md</button>
-        <button class="btn ghost sm" id="expJson">Data .json</button>
-        <button class="btn ghost sm" id="rerun" title="Same idea, different random crowd">Re-roll crowd</button>
-        <button class="btn ghost sm" id="restart">New idea</button>
+        <button class="btn ghost sm" id="share" data-i="copy">Copy link</button>
+        <button class="btn ghost sm" id="expMd" data-i="repMd">Report .md</button>
+        <button class="btn ghost sm" id="expJson" data-i="dataJson">Data .json</button>
+        <button class="btn ghost sm" id="rerun" data-it="rerunT" title="Same idea, different random crowd" data-i="reroll">Re-roll crowd</button>
+        <button class="btn ghost sm" id="restart" data-i="newIdea">New idea</button>
       </div>
     </div>
 
     <div class="event" id="eventBox">
       <div class="row">
-        <input type="text" id="evText" maxlength="160" placeholder="Breaking news, e.g. “A leaked study says it will cut traffic by 30%”">
-        <label class="ctl">Tone <select id="evTone"><option value="1">Good news</option><option value="-1">Bad news</option></select></label>
-        <label class="ctl">Reaches <select id="evGroup"></select></label>
-        <label class="ctl">Strength <input id="evStr" type="range" min="1" max="5" value="3"><output id="oStr">3</output></label>
-        <button class="btn sm" id="evGo">Drop it</button>
+        <input type="text" id="evText" maxlength="160" data-iph="evPh" placeholder="Breaking news, e.g. “A leaked study says it will cut traffic by 30%”">
+        <label class="ctl"><span data-i="tone">Tone</span> <select id="evTone"><option value="1" data-i="good">Good news</option><option value="-1" data-i="bad">Bad news</option></select></label>
+        <label class="ctl"><span data-i="reaches">Reaches</span> <select id="evGroup"></select></label>
+        <label class="ctl"><span data-i="strength">Strength</span> <input id="evStr" type="range" min="1" max="5" value="3"><output id="oStr">3</output></label>
+        <button class="btn sm" id="evGo" data-i="drop">Drop it</button>
       </div>
-      <div class="hint">The event shows up in the feed, shifts the opinions of the people it reaches (stubborn agents move less) and is marked on the forecast chart.</div>
+      <div class="hint" data-i="evHint">The event shows up in the feed, shifts the opinions of the people it reaches (stubborn agents move less) and is marked on the forecast chart.</div>
     </div>
 
     <div class="tabs" id="tabs">
-      <button class="tab on" data-t="live">Live network</button>
-      <button class="tab" data-t="personas">Personas</button>
-      <button class="tab" data-t="report">Forecast report</button>
-      <button class="tab" data-t="chat">Interview</button>
+      <button class="tab on" data-t="live" data-i="tLive">Live network</button>
+      <button class="tab" data-t="personas" data-i="tPers">Personas</button>
+      <button class="tab" data-t="report" data-i="tRep">Forecast report</button>
+      <button class="tab" data-t="chat" data-i="tChat">Interview</button>
     </div>
 
     <div data-p="live" class="grid">
-      <div class="card"><h3>Social graph <span class="spacer"></span><button class="btn ghost sm" id="relayout">Re-layout</button></h3>
+      <div class="card"><h3><span data-i="graphH">Social graph</span> <span class="spacer"></span><button class="btn ghost sm" id="relayout" data-i="relayout">Re-layout</button></h3>
         <div class="gwrap"><canvas id="graph"></canvas><div class="tip" id="tip"></div></div>
-        <div class="scrub"><button class="btn ghost sm" id="replay" title="Replay the debate from round 0 (R)">▶ Replay</button><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Rewind to round"><span id="scrubLbl"></span></div>
-        <div class="legend"><span><i class="dot" style="background:var(--pos)"></i>supports</span><span><i class="dot" style="background:var(--und)"></i>undecided</span><span><i class="dot" style="background:var(--neg)"></i>opposes</span><span>size = influence · drag nodes · click to select</span></div>
+        <div class="scrub"><button class="btn ghost sm" id="replay" data-it="replayT" title="Replay the debate from round 0 (R)">▶ Replay</button><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Rewind to round"><span id="scrubLbl"></span></div>
+        <div class="legend"><span><i class="dot" style="background:var(--pos)"></i><span data-i="lSup">supports</span></span><span><i class="dot" style="background:var(--und)"></i><span data-i="lUnd">undecided</span></span><span><i class="dot" style="background:var(--neg)"></i><span data-i="lOpp">opposes</span></span><span data-i="lHow">size = influence · drag nodes · click to select</span></div>
         <div class="gchips" id="gchips"></div>
         <div class="selcard" id="selcard"></div>
       </div>
-      <div class="card"><h3>How the crowd is reacting</h3>
-        <div class="feedtools"><input id="fq" placeholder="Search posts…"><span id="moodChips" class="row"></span></div>
+      <div class="card"><h3 data-i="feedH">How the crowd is reacting</h3>
+        <div class="feedtools"><input id="fq" data-iph="fqPh" placeholder="Search posts…"><span id="moodChips" class="row"></span></div>
         <div class="filterbar" id="filterbar"></div>
         <div class="feed" id="feed"></div>
       </div>
     </div>
 
     <div data-p="personas" class="hide">
-      <div class="ptools"><input id="pq" placeholder="Search by name, role, trait…">
-        <label class="ctl">Group <select id="pg"></select></label>
-        <label class="ctl">Sort <select id="ps"><option value="inf">Influence</option><option value="op">Most supportive</option><option value="-op">Most opposed</option><option value="shift">Biggest shift</option><option value="posts">Most posts</option></select></label>
+      <div class="ptools"><input id="pq" data-iph="pqPh" placeholder="Search by name, role, trait…">
+        <label class="ctl"><span data-i="group">Group</span> <select id="pg"></select></label>
+        <label class="ctl"><span data-i="sort">Sort</span> <select id="ps"><option value="inf" data-i="soInf">Influence</option><option value="op" data-i="soSup">Most supportive</option><option value="-op" data-i="soOpp">Most opposed</option><option value="shift" data-i="soShift">Biggest shift</option><option value="posts" data-i="soPosts">Most posts</option></select></label>
       </div>
       <div class="personas" id="plist"></div>
     </div>
 
     <div data-p="report" class="hide">
       <div class="grid">
-        <div class="card"><h3>Forecast</h3><p class="verdict" id="verdict"></p>
+        <div class="card"><h3 data-i="hFc">Forecast</h3><p class="verdict" id="verdict"></p>
           <div class="stack" id="stack"></div><div class="legend" id="stackLeg"></div></div>
-        <div class="card"><h3>Opinion over time <span class="spacer"></span><span id="chartRead" style="text-transform:none;letter-spacing:0"></span></h3><svg id="chart" viewBox="0 0 400 190" width="100%" height="190"></svg></div>
-        <div class="card"><h3>How sure is this?</h3><div id="mcOut"></div></div>
-        <div class="card"><h3>Compare variants</h3><div id="cmpOut"></div></div>
-        <div class="card"><h3>Top concerns · click to read posts</h3><ul class="list" id="concerns"></ul></div>
-        <div class="card"><h3>Opinion leaders · click to interview</h3><ul class="list" id="leaders"></ul></div>
-        <div class="card"><h3>By group · click to highlight</h3><ul class="list" id="groups"></ul></div>
-        <div class="card"><h3>Biggest shifts</h3><ul class="list" id="shifts"></ul></div>
+        <div class="card"><h3><span data-i="hTime">Opinion over time</span> <span class="spacer"></span><span id="chartRead" style="text-transform:none;letter-spacing:0"></span></h3><svg id="chart" viewBox="0 0 400 190" width="100%" height="190"></svg></div>
+        <div class="card"><h3 data-i="hSure">How sure is this?</h3><div id="mcOut"></div></div>
+        <div class="card"><h3 data-i="hCmp">Compare variants</h3><div id="cmpOut"></div></div>
+        <div class="card"><h3 data-i="hAdv">What would make it land better?</h3><div id="advOut"></div></div>
+        <div class="card"><h3 data-i="hShare">Share the result</h3><p class="hint" style="margin-top:0" data-i="shareP">A picture of the forecast for a chat or a slide, or the whole run as a file you can open again later (events, nudges and boosts are replayed exactly).</p>
+          <div class="row"><button class="btn sm" id="cardPng" data-i="cardPng">Result card .png</button><button class="btn ghost sm" id="saveRun" data-i="saveRun">Save run .json</button></div></div>
+        <div class="card"><h3 data-i="hCon">Top concerns · click to read posts</h3><ul class="list" id="concerns"></ul></div>
+        <div class="card"><h3 data-i="hLead">Opinion leaders · click to interview</h3><ul class="list" id="leaders"></ul></div>
+        <div class="card"><h3 data-i="hGroup">By group · click to highlight</h3><ul class="list" id="groups"></ul></div>
+        <div class="card"><h3 data-i="hShift">Biggest shifts</h3><ul class="list" id="shifts"></ul></div>
       </div>
     </div>
 
     <div data-p="chat" class="hide grid">
-      <div class="card"><h3>Pick someone</h3><div class="personas" id="pick" style="max-height:580px;overflow:auto"></div></div>
+      <div class="card"><h3 data-i="pickH">Pick someone</h3><div class="personas" id="pick" style="max-height:580px;overflow:auto"></div></div>
       <div class="card chat"><h3><span id="chatWho">Interview</span><span class="spacer"></span>
-          <span class="mode"><button class="chip on" data-m="one" id="m1">One-on-one</button><button class="chip" data-m="crowd" id="m2">Ask the crowd</button></span></h3>
+          <span class="mode"><button class="chip on" data-m="one" id="m1" data-i="m1">One-on-one</button><button class="chip" data-m="crowd" id="m2" data-i="m2">Ask the crowd</button></span></h3>
         <div class="msgs" id="msgs"></div>
         <div class="sugs" id="sugs"></div>
-        <div class="compose"><input id="ask" maxlength="200" placeholder="Ask them anything…"><button class="btn" id="send">Send</button></div>
+        <div class="compose"><input id="ask" maxlength="200" data-iph="askPh" placeholder="Ask them anything…"><button class="btn" id="send" data-i="send">Send</button></div>
       </div>
     </div>
   </section>
-  <footer>Concept prototype · agents are simulated in your browser with seeded rules — they are not real people and this is not a real forecast.</footer>
+  <footer data-i="footer">Concept prototype · agents are simulated in your browser with seeded rules — they are not real people and this is not a real forecast.</footer>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -287,6 +318,66 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),1600);};
+
+/* ---------- language (EN / PL) ---------- */
+let LANG=(()=>{let s=null;try{s=localStorage.getItem("swarmcast.lang");}catch{}return s==="pl"||s==="en"?s:(navigator.language||"").toLowerCase().startsWith("pl")?"pl":"en";})();
+const L=(en,pl)=>LANG==="pl"?pl:en;
+const I18N={tagline:"· prognozy z symulacji tłumu",eyebrow:"Pomysł na wejściu → tłum na wyjściu",h1:"Przećwicz przyszłość<br>na <em>symulowanym tłumie</em>",
+ sub:"Opisz produkt, przepis albo ogłoszenie. Swarmcast tworzy populację person, łączy je w sieć społeczną i pozwala im się kłócić. Steruj na żywo: wrzucaj wiadomości, zmieniaj komuś zdanie, podbijaj posty — a potem czytaj prognozę i rozmawiaj z kimkolwiek z tłumu.",
+ ideaPh:"np. Od przyszłego roku miasto pobierze 20 zł za każdy samochód wjeżdżający do centrum w dni robocze.",agents:"Osoby",rounds:"Rundy",crowd:"Tłum",ownP:"+ Własna persona",run:"Uruchom symulację →",
+ crPh:"Twój typ persony, np. Taksówkarz",leans:"Nastawienie",worry:"Główna obawa",share:"Udział",remove:"Usuń",crHint:"Dodana do tłumu jako osobna grupa. Zostaw puste pole nazwy, żeby ją pominąć.",
+ recentH:"Twoje ostatnie symulacje",s1b:"01 POMYSŁ",s1:"Opisujesz scenariusz zwykłymi słowami.",s2b:"02 PERSONY",s2:"Każda osoba dostaje rolę, wartości i początkowe zdanie.",
+ s3b:"03 SIEĆ",s3:"Obserwują się, piszą, odpowiadają i wpływają na siebie — możesz się wtrącać.",s4b:"04 PROGNOZA",s4:"Raport + wywiady z jedną osobą albo z całym tłumem.",
+ benchH:"Czy to się zgadza z prawdziwymi głosowaniami?",benchP:"Dziewięć prawdziwych referendów ze znanym wynikiem, wpisanych jako zwykłe pomysły. Widać, jak daleko tłum oparty na regułach ląduje od tego, jak ludzie naprawdę głosowali.",
+ open:"Otwórz zapisaną symulację (.json)",kR:"RUNDA",kP:"POSTY",kS:"POPARCIE",kM:"NASTRÓJ",stepT:"Jedna runda dalej",step1:"+1 runda",moreT:"Niech debata trwa dalej",more10:"+10 rund",speed:"Tempo",
+ evBtn:"📰 Wrzuć wydarzenie",aiT:"Posty liderów opinii i odpowiedzi w wywiadach pisze Claude",copy:"Kopiuj link",repMd:"Raport .md",dataJson:"Dane .json",rerunT:"Ten sam pomysł, inny losowy tłum",reroll:"Wylosuj tłum",newIdea:"Nowy pomysł",
+ evPh:"Pilna wiadomość, np. „Wyciekło badanie: korki spadną o 30%”",tone:"Wydźwięk",good:"Dobra wiadomość",bad:"Zła wiadomość",reaches:"Dociera do",strength:"Siła",drop:"Wrzuć",
+ evHint:"Wydarzenie pojawia się w kanale, przesuwa zdanie osób, do których dociera (uparci zmieniają się mniej) i jest zaznaczone na wykresie prognozy.",
+ tLive:"Sieć na żywo",tPers:"Persony",tRep:"Raport z prognozą",tChat:"Wywiad",graphH:"Graf społeczny",relayout:"Ułóż od nowa",replayT:"Odtwórz debatę od rundy 0 (R)",
+ lSup:"za",lUnd:"niezdecydowani",lOpp:"przeciw",lHow:"wielkość = wpływ · przeciągaj węzły · kliknij, by wybrać",feedH:"Jak reaguje tłum",fqPh:"Szukaj w postach…",pqPh:"Szukaj po imieniu, roli, cesze…",
+ group:"Grupa",sort:"Sortuj",soInf:"Wpływ",soSup:"Najbardziej za",soOpp:"Najbardziej przeciw",soShift:"Największa zmiana",soPosts:"Najwięcej postów",
+ hFc:"Prognoza",hTime:"Opinia w czasie",hSure:"Na ile to pewne?",hCmp:"Porównanie wersji",hAdv:"Co by pomogło?",hShare:"Udostępnij wynik",
+ shareP:"Obrazek z prognozą do czatu albo na slajd, albo cała symulacja jako plik, który otworzysz później (wydarzenia, zmiany zdania i podbicia odtwarzają się dokładnie).",
+ cardPng:"Karta wyniku .png",saveRun:"Zapisz symulację .json",hCon:"Główne obawy · kliknij, by czytać posty",hLead:"Liderzy opinii · kliknij, by porozmawiać",hGroup:"Według grup · kliknij, by podświetlić",hShift:"Największe zmiany zdania",
+ pickH:"Wybierz osobę",m1:"Jeden na jeden",m2:"Zapytaj tłum",askPh:"Zapytaj o cokolwiek…",send:"Wyślij",
+ footer:"Prototyp koncepcyjny · osoby są symulowane w twojej przeglądarce regułami z ziarnem losowości — to nie są prawdziwi ludzie i to nie jest prawdziwa prognoza."};
+const I18N_EN={};
+function applyI18n(){document.documentElement.lang=LANG;
+  $$("[data-i]").forEach(e=>{const k=e.dataset.i;I18N_EN[k]??=e.textContent;e.textContent=LANG==="pl"&&I18N[k]?I18N[k]:I18N_EN[k];});
+  $$("[data-ih]").forEach(e=>{const k=e.dataset.ih;I18N_EN[k]??=e.innerHTML;e.innerHTML=LANG==="pl"&&I18N[k]?I18N[k]:I18N_EN[k];});
+  $$("[data-iph]").forEach(e=>{const k="ph:"+e.dataset.iph;I18N_EN[k]??=e.placeholder;e.placeholder=LANG==="pl"?I18N[e.dataset.iph]:I18N_EN[k];});
+  $$("[data-it]").forEach(e=>{const k="t:"+e.dataset.it;I18N_EN[k]??=e.title;e.title=LANG==="pl"?I18N[e.dataset.it]:I18N_EN[k];});
+  $$("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===LANG));}
+const ROLE_PL={"Early adopter":["Entuzjasta nowinek","entuzjaści nowinek"],"Software engineer":["Programista","programiści"],"Startup founder":["Założyciel startupu","założyciele startupów"],
+ "Small business owner":["Właściciel małej firmy","właściciele małych firm"],"Investor":["Inwestor","inwestorzy"],"Working parent":["Pracujący rodzic","pracujący rodzice"],
+ "University student":["Student","studenci"],"Retiree":["Emeryt","emeryci"],"Investigative journalist":["Dziennikarz śledczy","dziennikarze śledczy"],
+ "Lifestyle influencer":["Influencer","influencerzy"],"Climate activist":["Aktywista klimatyczny","aktywiści klimatyczni"],"Policy analyst":["Analityk polityk publicznych","analitycy"],
+ "Nurse":["Pielęgniarka","pielęgniarki"],"Teacher":["Nauczyciel","nauczyciele"],"Delivery driver":["Kurier","kurierzy"],"Local councillor":["Radny","radni"],
+ "Rural resident":["Mieszkaniec wsi","mieszkańcy wsi"],"Gamer":["Gracz","gracze"],"Freelance designer":["Grafik freelancer","freelancerzy"],"Privacy advocate":["Obrońca prywatności","obrońcy prywatności"]};
+const roleL=r=>LANG==="pl"&&ROLE_PL[r]?ROLE_PL[r][0]:r, rolesL=r=>LANG==="pl"?(ROLE_PL[r]?.[1]||r):r+"s";
+const GROUP_PL={All:"Wszyscy",Tech:"Technologia",Business:"Biznes",Families:"Rodziny",Youth:"Młodzi",Seniors:"Seniorzy",Media:"Media",Civic:"Społecznicy","Public sector":"Sektor publiczny",Workers:"Pracownicy",Custom:"Własna"};
+const groupL=g=>LANG==="pl"?GROUP_PL[g]||g:g;
+const MOOD_PL={Excited:"Zachwyt",Supportive:"Za",Curious:"Ciekawość",Skeptical:"Sceptycyzm",Angry:"Złość"};
+const moodL=m=>LANG==="pl"?MOOD_PL[m]||m:m;
+const TRAIT_PL={blunt:"bezpośredni",warm:"ciepły",sarcastic:"sarkastyczny",analytical:"analityczny",cautious:"ostrożny",optimistic:"optymista",contrarian:"przekorny",loyal:"lojalny","data-driven":"liczy na dane","story-teller":"gawędziarz","community-minded":"społecznik","self-reliant":"samodzielny","trend-follower":"idzie za trendem"};
+const traitL=t=>LANG==="pl"?TRAIT_PL[t]||t:t;
+const BIO_PL={"Early adopter":"Testuje wszystko pierwszy i od razu o tym pisze.","Software engineer":"Czyta drobny druk, a potem kod źródłowy.","Startup founder":"W każdej zmianie widzi okazję.",
+ "Small business owner":"Prowadzi sklep na małej marży.","Investor":"Myśli w horyzoncie pięciu lat.","Working parent":"Godzi dwie prace i dwoje dzieci.","University student":"Głośny w sieci, spłukany poza nią.",
+ "Retiree":"Pamięta czasy, gdy wszystko po prostu działało.","Investigative journalist":"Idzie śladem pieniędzy i dokumentów.","Lifestyle influencer":"300 tys. obserwujących i lampa pierścieniowa.",
+ "Climate activist":"W weekendy organizuje protesty.","Policy analyst":"Żyje w arkuszach i raportach.","Nurse":"Dwunastogodzinne dyżury, zero cierpliwości do PR-u.","Teacher":"Tłumaczy wszystko dwa razy, cierpliwie.",
+ "Delivery driver":"Płacą od paczki, więc zawsze w biegu.","Local councillor":"Zawsze o krok od kolejnych wyborów.","Rural resident":"Czterdzieści minut od najbliższego czegokolwiek.",
+ "Gamer":"Ma zdanie i mikrofon, żeby je wygłosić.","Freelance designer":"Wystawia faktury późno w nocy.","Privacy advocate":"Czyta każdy regulamin."};
+const BENEFIT_PL={"Early adopter":"bardzo ułatwić mi tydzień","Software engineer":"wreszcie rozwiązać prawdziwy problem","Startup founder":"otworzyć zupełnie nowy rynek","Small business owner":"przyciągnąć więcej ludzi do mojego sklepu",
+ "Investor":"być dobrą inwestycją na lata","Working parent":"oszczędzić nam czasu w zabiegane dni","University student":"naprawdę pomóc ludziom w moim wieku","Retiree":"choć raz uprościć sprawy",
+ "Investigative journalist":"być prawdziwym dobrem publicznym","Lifestyle influencer":"świetnie wyglądać na moim profilu","Climate activist":"naprawdę obniżyć emisje","Policy analyst":"zadziałać, jeśli szczegóły będą dobre",
+ "Nurse":"odciążyć ludzi na pierwszej linii","Teacher":"dać dzieciom bardziej sprawiedliwy start","Delivery driver":"zostawić mi trochę więcej w kieszeni","Local councillor":"pokazać, że nasze miasto myśli przyszłościowo",
+ "Rural resident":"wreszcie dotrzeć do ludzi spoza miasta","Gamer":"być naprawdę fajne","Freelance designer":"pomóc freelancerom takim jak ja","Privacy advocate":"szanować prawa ludzi"};
+const bioL=a=>LANG==="pl"?BIO_PL[a.role]||(a.group==="Custom"?"Typ persony dodany przez ciebie do tego tłumu.":a.bio):a.bio;
+const benefitL=a=>LANG==="pl"?BENEFIT_PL[a.role]||"naprawdę coś zmienić dla ludzi takich jak ja":a.benefit;
+const CONCERN_PL={hype:"szum medialny",cost:"koszty",privacy:"prywatność",reliability:"niezawodność",regulation:"regulacje",competition:"konkurencja",customers:"utrata klientów",returns:"zwrot z inwestycji",risk:"ryzyko",
+ time:"czas",fairness:"sprawiedliwość",access:"dostępność",complexity:"skomplikowanie",transparency:"przejrzystość",accountability:"odpowiedzialność",image:"wizerunek",trend:"trwałość mody",environment:"środowisko",
+ "side effects":"skutki uboczne",evidence:"dowody",workload:"obciążenie pracą",jobs:"miejsca pracy",income:"dochody",voters:"reakcja wyborców",budget:"budżet",quality:"jakość",surveillance:"inwigilacja",
+ commute:"dojazdy",learning:"jakość nauki",productivity:"produktywność",affordability:"przystępność cen"};
 
 /* ---------- seeded randomness ---------- */
 let seed=1;
@@ -298,6 +389,7 @@ const gauss=()=>(rnd()+rnd()+rnd()-1.5)/1.5;
 const sgn=v=>(v>=0?"+":"")+v.toFixed(2);
 
 /* ---------- world data ---------- */
+const EXAMPLES_PL=["Od przyszłego roku miasto pobierze 20 zł za każdy samochód wjeżdżający do centrum w dni robocze","Sieć kawiarni wprowadza abonament na nielimitowaną kawę za 39 zł miesięcznie","Uczelnia zastępuje egzaminy pisemne testami online pilnowanymi przez AI","Producent smartfonów usuwa ładowarkę i gniazdo słuchawkowe z nowego modelu","Rząd wprowadza 4-dniowy tydzień pracy dla urzędników"];
 const EXAMPLES=[
  "Our city will charge €5 for every car entering the centre on weekdays",
  "A coffee chain launches a €9/month unlimited coffee subscription",
@@ -330,38 +422,74 @@ const ROLES=[
  ["Freelance designer","Workers",.15,.5,.4,["income","quality"],"help freelancers like me","Invoices late at night."],
  ["Privacy advocate","Civic",-.3,.6,.55,["privacy","surveillance"],"respect people's rights","Reads every terms-of-service."]
 ];
-const GROUPS=[...new Set(ROLES.map(r=>r[1]))];
+let GROUPS=[...new Set(ROLES.map(r=>r[1]))];
+/* Crowd mixes: relative weight per role (default 1). "balanced" keeps the original even rotation. */
+const MIXES={
+ balanced:{label:"Balanced",w:{}},
+ city:{label:"Big city",w:{"Software engineer":1.6,"Early adopter":1.4,"Startup founder":1.4,"Investor":1.2,"University student":1.5,"Freelance designer":1.4,"Lifestyle influencer":1.3,"Climate activist":1.3,"Rural resident":.15,"Retiree":.7,"Delivery driver":1.2}},
+ rural:{label:"Countryside",w:{"Rural resident":4,"Retiree":1.8,"Small business owner":1.5,"Working parent":1.5,"Delivery driver":1.2,"Startup founder":.3,"Investor":.4,"Lifestyle influencer":.3,"Software engineer":.5,"Climate activist":.5,"Gamer":.6}},
+ young:{label:"Students & young",w:{"University student":4,"Gamer":2,"Early adopter":1.6,"Freelance designer":1.4,"Climate activist":1.4,"Lifestyle influencer":1.3,"Retiree":.15,"Investor":.3,"Rural resident":.5}},
+ older:{label:"Older population",w:{"Retiree":4,"Rural resident":1.4,"Nurse":1.3,"Working parent":1.1,"University student":.35,"Gamer":.2,"Early adopter":.35,"Lifestyle influencer":.3,"Startup founder":.4}},
+ business:{label:"Business district",w:{"Startup founder":3,"Investor":2.5,"Small business owner":2.5,"Software engineer":1.6,"Policy analyst":1.2,"Delivery driver":.5,"Climate activist":.5,"Retiree":.4,"University student":.5}}
+};
+let MIX={id:"balanced",custom:null};
+const cleanName=s=>String(s||"").replace(/[^\p{L}\p{N} \-]/gu,"").replace(/\s+/g," ").trim().slice(0,30);
+function customRole(c){return[c.name,"Custom",c.stance,.55,.55,[c.concern,c.concern==="cost"?"fairness":"cost"],"make a real difference for people like me","A persona type you added to this crowd."];}
+/* role for each of n agents: largest-remainder apportionment of the weights, then interleaved so groups mix */
+function roleList(n,mix){
+  if((!mix||mix.id==="balanced")&&!mix?.custom)return Array.from({length:n},(_,i)=>ROLES[i%ROLES.length]);
+  const w=MIXES[mix.id]?.w||{},pool=ROLES.map(r=>[r,w[r[0]]??1]);
+  let left=n;const out=[];
+  if(mix.custom){const k=clamp(Math.round(n*mix.custom.share/100),1,n-1);pool.unshift([customRole(mix.custom),0]);out.push([pool[0][0],k]);left-=k;}
+  const rest=pool.filter(p=>p[1]>0),tot=rest.reduce((s,p)=>s+p[1],0),raw=rest.map(p=>[p[0],p[1]/tot*left]);
+  const cnt=raw.map(([r,v])=>[r,Math.floor(v),v-Math.floor(v)]);let miss=left-cnt.reduce((s,c)=>s+c[1],0);
+  cnt.slice().sort((a,b)=>b[2]-a[2]).forEach(c=>{if(miss>0){c[1]++;miss--;}});
+  const all=out.concat(cnt.map(c=>[c[0],c[1]])),seq=[];
+  for(let more=true;more;){more=false;all.forEach(c=>{if(c[1]>0){seq.push(c[0]);c[1]--;more=true;}});}
+  return seq;
+}
 const CONCERN_TXT={hype:"the hype",cost:"the cost",privacy:"privacy",reliability:"reliability",regulation:"regulation",competition:"competition",customers:"losing customers",returns:"the returns",risk:"the risk",time:"time",fairness:"fairness",access:"access",complexity:"how complicated it is",transparency:"transparency",accountability:"who is accountable",image:"the image",trend:"whether it lasts",environment:"the environment","side effects":"side effects",evidence:"the evidence",workload:"workload",jobs:"jobs",income:"income",voters:"voter backlash",budget:"the budget",quality:"quality",surveillance:"surveillance"};
 Object.assign(CONCERN_TXT,{commute:"getting around",learning:"the quality of learning",productivity:"productivity",affordability:"affordability"});
 /* Reading the idea: framing (restrictive vs generous) + topic domains. "stake" = how hard a role is hit, it amplifies the
    framing in either direction; "lean" = a fixed preference of that role on the topic; "hot" = the concern it adds. */
-const RESTRICT=/\bcharg(e|es|ing)\b|\btax|\bfees?\b|\bban(s|ned)?\b|remov|replac|\bcut|price rise|increas|\bfines?\b|proctor|surveil|\btrack|mandator|compulsor|abolish|\bclos(e|es|ing)\b/;
-const GENEROUS=/\bfree\b|unlimited|cheaper|faster|four-day|4-day|subsid|discount|bonus|\bopen|\bmore\b/;
+const RESTRICT=/opłat|pobier|podat|zakaz|usun|zastąp|zastęp|obetn|cięci|podwyż|mandat|\bkar[ay]\b|obowiązk|likwid|zamyk|zamkn|\bcharg(e|es|ing)\b|\btax|\bfees?\b|\bban(s|ned)?\b|remov|replac|\bcut|price rise|increas|\bfines?\b|proctor|surveil|\btrack|mandator|compulsor|abolish|\bclos(e|es|ing)\b/;
+const GENEROUS=/darmow|bezpłat|za darmo|bez limitu|nielimit|tańsz|szybsz|4-dniow|czterodniow|dopłat|zniżk|rabat|premi|\bwięcej\b|\bfree\b|unlimited|cheaper|faster|four-day|4-day|subsid|discount|bonus|\bopen|\bmore\b/;
 const DOMAINS=[
- {label:"transport",re:/\bcars?\b|traffic|\bdriv|parking|congestion|\bbus(es)?\b|\btrains?\b|\bbikes?\b|cycl|\broads?\b|commut|\btoll|fuel|petrol|metro|\btram/,
+ {label:"transport",re:/samoch|\baut(o|a|em|ami)?\b|kork|ruch drogow|parkow|autobus|pociąg|rower|\bdrog|dojazd|wjazd|paliw|benzyn|metr[oa]\b|tramwaj|\bcars?\b|traffic|\bdriv|parking|congestion|\bbus(es)?\b|\btrains?\b|\bbikes?\b|cycl|\broads?\b|commut|\btoll|fuel|petrol|metro|\btram/,
   stake:{"Rural resident":1.3,"Delivery driver":1.3,"Working parent":.6,"Small business owner":.6,"Retiree":.3},lean:{"Climate activist":.35,"Policy analyst":.15,"University student":.15},hot:"commute"},
- {label:"pricing",re:/€|\$|£|price|subscription|per month|\/month|monthly|\bfees?\b|\bcosts?\b|cheap|discount|\bpay\b/,
+ {label:"pricing",re:/\d\s?zł|złotych|\szł(\s|$)|cen[aęyie]\b|abonament|subskrypc|miesięcznie|\/mies|opłat|koszt|\btani|zniżk|\bpłac|€|\$|£|price|subscription|per month|\/month|monthly|\bfees?\b|\bcosts?\b|cheap|discount|\bpay\b/,
   stake:{"Working parent":.5,"Retiree":.5,"University student":.5,"Delivery driver":.5,"Small business owner":.3},hot:"cost"},
- {label:"education",re:/school|universit|exam|student|teacher|lesson|homework|campus|curricul/,stake:{"University student":1.5,"Teacher":1.2},hot:"learning"},
- {label:"work",re:/work[- ]?week|4-day|four-day|salar|wage|\bjobs?\b|working hours|remote work|overtime|public servant|employ|pension/,
+ {label:"education",re:/szkoł|szkol|uczel|uniwersytet|egzamin|student|nauczyc|lekcj|prac(a|e) domow|kampus|school|universit|exam|student|teacher|lesson|homework|campus|curricul/,stake:{"University student":1.5,"Teacher":1.2},hot:"learning"},
+ {label:"work",re:/tydzień pracy|tygodnia pracy|4-dniow|czterodniow|pensj|wynagrodz|płac[ay] minimaln|miejsc(a)? pracy|godzin pracy|zdaln|nadgodzin|urzędni|zatrudn|emerytur|urlop|work[- ]?week|4-day|four-day|salar|wage|\bjobs?\b|working hours|remote work|overtime|public servant|employ|pension/,
   stake:{"Nurse":1.2,"Teacher":1.2,"Delivery driver":1,"Freelance designer":.6},lean:{"Small business owner":-.2,"Investor":-.15},hot:"productivity"},
- {label:"devices",re:/phone|charger|headphone|device|gadget|laptop|console/,stake:{"Early adopter":1,"Gamer":.8,"Retiree":.6},hot:"quality"},
- {label:"data & AI",re:/\bai\b|data|algorithm|camera|facial|online|\bapps?\b|digital/,lean:{"Privacy advocate":-.25,"Software engineer":-.05,"Early adopter":.1},hot:"privacy"},
- {label:"environment",re:/climate|emission|\bgreen\b|carbon|plastic|recycl|solar|electric|pollut|clean air/,lean:{"Climate activist":.3},stake:{"Small business owner":.4},hot:"environment"},
- {label:"health",re:/health|hospital|doctor|vaccin|\bcare\b|nurse|medic|clinic/,stake:{"Nurse":1.2,"Retiree":1},hot:"access"},
- {label:"housing",re:/\brent\b|housing|apartment|mortgage|landlord|\bhomes?\b/,stake:{"University student":1.2,"Working parent":1},lean:{"Investor":-.15},hot:"affordability"}
+ {label:"devices",re:/telefon|ładowar|słuchawk|urządzen|gadżet|konsol|phone|charger|headphone|device|gadget|laptop|console/,stake:{"Early adopter":1,"Gamer":.8,"Retiree":.6},hot:"quality"},
+ {label:"data & AI",re:/\bsi\b|sztuczn|\bdane\b|danych|algorytm|kamer|rozpoznawan|aplikacj|cyfrow|\bai\b|data|algorithm|camera|facial|online|\bapps?\b|digital/,lean:{"Privacy advocate":-.25,"Software engineer":-.05,"Early adopter":.1},hot:"privacy"},
+ {label:"environment",re:/klimat|emisj|ekolog|zielon|węgl|plastik|recykl|fotowolt|elektryczn|zanieczyszcz|smog|co2|climate|emission|\bgreen\b|carbon|plastic|recycl|solar|electric|pollut|clean air/,lean:{"Climate activist":.3},stake:{"Small business owner":.4},hot:"environment"},
+ {label:"health",re:/zdrow|szpital|lekarz|szczepi|opiek|pielęgn|medycz|przychodn|health|hospital|doctor|vaccin|\bcare\b|nurse|medic|clinic/,stake:{"Nurse":1.2,"Retiree":1},hot:"access"},
+ {label:"housing",re:/czynsz|mieszka(ń|n)|najem|hipote|wynajm|deweloper|\brent\b|housing|apartment|mortgage|landlord|\bhomes?\b/,stake:{"University student":1.2,"Working parent":1},lean:{"Investor":-.15},hot:"affordability"}
 ];
 function readIdea(low){
   const neg=RESTRICT.test(low),gen=GENEROUS.test(low),frame=(neg?-1:0)+(gen?1:0),fx={},hot={},doms=[];
   DOMAINS.forEach(d=>{if(!d.re.test(low))return;doms.push(d.label);
     Object.entries(d.stake||{}).forEach(([r,k])=>{if(frame){fx[r]=(fx[r]||0)+frame*.12*k;hot[r]??=d.hot;}});
     Object.entries(d.lean||{}).forEach(([r,v])=>{fx[r]=(fx[r]||0)+v;hot[r]??=d.hot;});});
-  Object.keys(fx).forEach(r=>fx[r]=clamp(fx[r],-.35,.35));
-  return{frame,mixed:neg&&gen,shift:frame*.18,fx,hot,doms};
+  const mods=MODS.filter(m=>m.re.test(low)),soft=clamp(mods.reduce((s,m)=>s+(m.soften||0),0),0,.8),all=mods.reduce((s,m)=>s+(m.all||0),0);
+  Object.keys(fx).forEach(r=>fx[r]=clamp(fx[r]<0?fx[r]*(1-soft):fx[r],-.35,.35));
+  const base=frame*.18;
+  return{frame,mixed:neg&&gen,shift:(base<0?base*(1-soft):base)+all,fx,hot,doms,mods:mods.map(m=>m.label)};
 }
+/* Softeners: how a plan is introduced. "all" nudges everyone, "soften" shrinks the negative part of the reaction. */
+const MODS=[
+ {id:"pilot",label:"pilot first",re:/pilotaż|próbn|okres testow|\bpilot|\btrial\b|test phase|trial period/,all:.07,clause:"starting with a 6-month pilot that is reviewed before it becomes permanent"},
+ {id:"exempt",label:"exemptions",re:/zwolni|z wyjątkiem|wyjątk|niskich dochod|\bulg|exempt|except for|exception for|low-income|discount for|free for (residents|locals|seniors|students)/,soften:.45,restrictive:true,clause:"with exemptions for residents and low-income households"},
+ {id:"revenue",label:"money given back",re:/pieniądze (pójdą|trafią|wrócą)|wpływy (pójdą|trafią)|przeznacz|na finansowanie|sfinansuj|zebrany grosz wraca|wraca do ludzi|use the money|money (goes|is spent|will go|will be spent)|spent on|reinvest|to fund|every (euro|pound|dollar|franc) raised/,all:.04,soften:.25,restrictive:true,clause:"with every euro raised going back into cheaper public services"},
+ {id:"voluntary",label:"voluntary",re:/dobrowoln|dla chętnych|opcjonaln|voluntar|opt[- ]in|optional/,soften:.55,restrictive:true,clause:"as a voluntary opt-in scheme"},
+ {id:"phased",label:"phased in",re:/stopniow|etapami|przez (dwa|trzy|cztery|\d+) lat|phased|gradual|step by step|over (two|three|four|\d+) years/,all:.03,soften:.2,clause:"phased in gradually over three years"},
+ {id:"consult",label:"public consultation",re:/konsultac|panel(u)? obywatel|referendum|consult|citizens'? (panel|assembly)|after a public vote/,all:.04,clause:"after a public consultation and a citizens' panel"}
+];
 let READ=readIdea("");
 const cap=s=>s[0].toUpperCase()+s.slice(1);
-const STOP=new Set("the a an and or but of to in on for with from by at is are was be will our their its this that every each next year starting into than then over under your my we you they it as new launches introduce introduces replace replaces removes".split(" "));
+const STOP=new Set("the a an and or but of to in on for with from by at is are was be will our their its this that every each next year starting into than then over under your my we you they it as new launches introduce introduces replace replaces removes będzie będą który która które oraz przez przy jest nasz nasze nasza nasi każdy każdego każda roku więc tylko także albo".split(" "));
 const MOODS={Excited:{c:"#1e9d3a",bg:"#d9f7d4"},Supportive:{c:"#2f7d3a",bg:"#e5f3e1"},Curious:{c:"#2b63b8",bg:"#dfeafb"},Skeptical:{c:"#9a6400",bg:"#fbecd2"},Angry:{c:"#b8261f",bg:"#fbdcda"}};
 const moodOf=(o,e)=>o<-.4&&e>.7?"Angry":o>.45&&e>.7?"Excited":o>.18?"Supportive":o>=-.18?"Curious":"Skeptical";
 const colOf=o=>{const t=(clamp(o,-1,1)+1)/2;const a=[255,90,90],m=[124,133,126],b=[107,227,122];const f=(x,y,u)=>Math.round(x+(y-x)*u);
@@ -378,9 +506,22 @@ const T={
  ev_pos:["Did you all see this? “{ev}” — that changes things for me.","“{ev}”. Okay, I'm a bit more convinced now.","If “{ev}” is true, the critics need a new argument."],
  ev_neg:["“{ev}”. This is exactly what I was afraid of.","Wow. “{ev}”. Who signed off on this?","So now “{ev}”… and we're supposed to just accept it?"]
 };
+/* Polish templates avoid gendered first-person past tense and keep concerns in quotes or after a colon (no case endings needed) */
+const T_PL={
+ pos:["Szczerze: {topic} to pomysł spóźniony o lata. Jako {role_l} widzę, że to mogłoby {benefit}.","Mocna opinia: {topic} to najlepszy pomysł tego roku. Ci, którzy martwią się o „{concern}”, w końcu się przekonają.","Szukam minusów — i nie widzę. Wchodzę w to.","Jeśli {topic} wejdzie w życie, może {benefit}. To wygrana.","„{kw}” — dokładnie tego potrzebowaliśmy. Dawajcie."],
+ neu:["Ciekawe… ale co z tematem: {concern}? Zanim uwierzę, chcę szczegółów.","Nie jestem ani za, ani przeciw. Pokażcie, jak rozwiążecie temat: {concern}.","Może pójść w obie strony. Wszystko zależy od jednego: {concern}.","Pytam serio: czy ktoś przemyślał temat „{concern}”?"],
+ neg:["Kto o to prosił? Sam temat „{concern}” robi z tego bałagan.","Jako {role_l} odczuję to pierwszy. Nikt nie pytał ludzi takich jak my, a „{concern}” to dla nas codzienność.","Kolejny pomysł zza biurka. Temat „{concern}” zignorują, aż będzie za późno.","Nie. Po prostu nie. Ten pomysł całkowicie pomija temat: {concern}.","Aż przykro patrzeć, jak „{kw}” jest forsowane, a „{concern}” nikogo nie obchodzi."],
+ rep_ag:["{to} dokładnie. „{Concern}” to sedno sprawy.","{to} zgadzam się — i nikt nie mówi tego wystarczająco głośno.","{to} w 100%. Udostępniam dalej."],
+ rep_dis:["{to} widzę to inaczej — temat „{concern}” da się rozwiązać.","{to} trochę przesadzasz, nie?","{to} z szacunkiem, ale ludzie tacy jak ja przeżywają to zupełnie odwrotnie."],
+ ev_pos:["Widzieliście? „{ev}” — to coś dla mnie zmienia.","„{ev}”. To mnie trochę bardziej przekonuje.","Jeśli „{ev}” to prawda, krytycy potrzebują nowego argumentu."],
+ ev_neg:["„{ev}”. Dokładnie tego się obawiam.","Wow. „{ev}”. Kto to zatwierdził?","Czyli teraz „{ev}”… i mamy to po prostu przyjąć?"]
+};
+const TX=()=>LANG==="pl"?T_PL:T;
+const ct=k=>LANG==="pl"?CONCERN_PL[k]||CONCERN_TXT[k]||k:CONCERN_TXT[k]||k;
+const topicL=()=>TOPIC==="this plan"?L("this plan","ten plan"):TOPIC;
 const fill=(s,a,x={})=>s.replace(/\{(\w+)\}/g,(_,k)=>{
-  const c=CONCERN_TXT[x.concern];
-  const m={topic:TOPIC,role_l:a.role.toLowerCase(),benefit:a.benefit,concern:c,Concern:cap(c),kw:KW.length?pick(KW):TOPIC,to:x.to||"",ev:x.ev||""};
+  const c=ct(x.concern);
+  const m={topic:topicL(),role_l:roleL(a.role).toLowerCase(),benefit:benefitL(a),concern:c,Concern:cap(c),kw:KW.length?pick(KW):topicL(),to:x.to||"",ev:x.ev||""};
   return m[k]??"";
 });
 
@@ -389,15 +530,17 @@ let agents=[],edges=[],posts=[],history=[],events=[],round=0,maxRounds=20,paused
 let selected=null,hoverA=null,hiGroup=null,concernCount={},postId=0;
 const filt={mood:null,q:"",concern:null,author:null};
 
-function build(idea,n,salt=0){
+function build(idea,n,salt=0,mix=MIX){
   IDEA=idea;seed=hash(idea)+salt;
+  const roles=roleList(n,mix);
+  GROUPS=[...new Set([...ROLES.map(r=>r[1]),...roles.map(r=>r[1])])].filter(g=>roles.some(r=>r[1]===g));
   const words=idea.toLowerCase().replace(/[^\p{L}\p{N}\s€$-]/gu," ").split(/\s+/).filter(w=>w.length>3&&!STOP.has(w));
   KW=[...new Set(words)].slice(0,6).map(esc);
   TOPIC=idea.length<70?`“${esc(idea.replace(/[.!?]+$/,""))}”`:"this plan";
   READ=readIdea(idea.toLowerCase());
   agents=[];
   for(let i=0;i<n;i++){
-    const r=ROLES[i%ROLES.length],name=`${pick(FIRST)} ${pick(LAST)}`,op=clamp(r[2]+READ.shift+(READ.fx[r[0]]||0)+gauss()*.45,-1,1);
+    const r=roles[i],name=`${pick(FIRST)} ${pick(LAST)}`,op=clamp(r[2]+READ.shift+(READ.fx[r[0]]||0)+gauss()*.45,-1,1);
     const concerns=READ.hot[r[0]]?[...new Set([READ.hot[r[0]],...r[5]])].slice(0,3):r[5];
     agents.push({id:i,name,handle:"@"+name.split(" ")[0].toLowerCase()+"_"+(10+Math.floor(rnd()*89)),role:r[0],group:r[1],emo:clamp(r[3]+gauss()*.15,0,1),
       inf:clamp(r[4]+gauss()*.2,.1,1),concerns,benefit:r[6],bio:r[7],op,op0:op,stub:.2+rnd()*.6,
@@ -432,45 +575,95 @@ function step(){
   agents.forEach(a=>{ if(rnd()<.12+a.emo*.22+a.inf*.1){
     const pool=posts.slice(-30).filter(p=>p.by!=null&&p.by!==a.id&&a.following.includes(p.by));
     const replyTo=pool.length&&rnd()<.4?pick(pool):null,concern=pick(a.concerns);
-    let text,isReply=false;
+    let text="",isReply=false;
     const lastEv=events.at(-1);
-    if(lastEv&&round-lastEv.round<=2&&rnd()<.35&&(lastEv.group==="All"||lastEv.group===a.group)){
-      text=fill(pick(lastEv.tone>0?T.ev_pos:T.ev_neg),a,{concern,ev:lastEv.text});
+    if(headless){if(replyTo){const other=agents[replyTo.by],agree=Math.sign(other.op)===Math.sign(a.op);isReply=true;a.op=clamp(a.op+(agree?.04:-.03)*Math.sign(a.op||1),-1,1);}}
+    else if(lastEv&&round-lastEv.round<=2&&rnd()<.35&&(lastEv.group==="All"||lastEv.group===a.group)){
+      text=fill(pick(lastEv.tone>0?TX().ev_pos:TX().ev_neg),a,{concern,ev:lastEv.text});
     }else if(replyTo){isReply=true;const other=agents[replyTo.by],agree=Math.sign(other.op)===Math.sign(a.op);
-      text=fill(pick(agree?T.rep_ag:T.rep_dis),a,{to:other.handle,concern});a.op=clamp(a.op+(agree?.04:-.03)*Math.sign(a.op||1),-1,1);}
-    else text=fill(pick(a.op>.18?T.pos:a.op<-.18?T.neg:T.neu),a,{concern});
+      text=fill(pick(agree?TX().rep_ag:TX().rep_dis),a,{to:other.handle,concern});a.op=clamp(a.op+(agree?.04:-.03)*Math.sign(a.op||1),-1,1);}
+    else text=fill(pick(a.op>.18?TX().pos:a.op<-.18?TX().neg:TX().neu),a,{concern});
     if(a.op<-.1)concernCount[concern]=(concernCount[concern]||0)+1+(a.inf>.6?1:0);
     fresh.push({id:postId++,by:a.id,text,op:a.op,mood:moodOf(a.op,a.emo),concern,round,reply:isReply,likes:0,boosted:false});a.posts++;a.flash=1;
   }});
   fresh.forEach(p=>influence(agents[p.by],p));
+  if(!headless&&!quiet)aiRewritePost(fresh);
   agents.forEach(a=>{a.op=clamp(a.op+gauss()*.02,-1,1);});
   posts.push(...fresh);history.push(stats());
-  if(headless)return;
+  if(headless||quiet)return;
   if(round>=maxRounds)finish();
   refresh();
 }
-function finish(){finished=true;paused=false;$("#pause").textContent="Done ✓";$("#pause").disabled=true;toast("Simulation finished — forecast ready");saveRecent();}
+function finish(){finished=true;paused=false;$("#pause").disabled=true;updateStatus();toast(L("Simulation finished — forecast ready","Symulacja skończona — prognoza gotowa"));saveRecent();}
 
 /* ---------- alternate crowds (Monte Carlo) ----------
    Re-runs the same idea with different random people and connections, replaying the user's events at the same rounds.
    Swaps the simulation globals out and restores them afterwards, so the visible run is untouched. */
 let headless=false,mc=null,curSalt=0;
 const pc=v=>Math.round(v*100)+"%";
-const mcKey=()=>[IDEA,agents.length,curSalt,round,events.map(e=>[e.round,e.tone,e.group,e.str].join(":")).join(",")].join("|");
+const mixKey=m=>m.id+(m.custom?":"+[m.custom.name,m.custom.stance,m.custom.concern,m.custom.share].join("~"):"");
+const mcKey=()=>[IDEA,agents.length,curSalt,round,mixKey(MIX),events.map(e=>[e.round,e.tone,e.group,e.str].join(":")).join(",")].join("|");
+/* N crowds of one scenario {idea,n,rounds,mix,events}; the visible run's state is saved and restored around it */
+function crowds(o,N){
+  const S={agents,edges,posts,history,events,round,maxRounds,concernCount,finished,postId,seed,KW,TOPIC,IDEA,READ,GROUPS},res=[];
+  headless=true;
+  try{for(let k=0;k<N;k++){build(o.idea,o.n,1000003+k*7919,o.mix);maxRounds=o.rounds;const evs=o.events||[];
+      const due=r=>evs.forEach(e=>{if(e.round===r){events.push({...e});applyEvent(e);}});
+      for(;;){due(round);if(round>=o.rounds)break;step();}
+      const s=stats();res.push({sup:s.sup,opp:s.opp,yes:s.sup+s.opp?s.sup/(s.sup+s.opp):.5});}}
+  finally{headless=false;({agents,edges,posts,history,events,round,maxRounds,concernCount,finished,postId,seed,KW,TOPIC,IDEA,READ,GROUPS}=S);}
+  return res;
+}
+const quant=(arr,p)=>{const s=arr.slice().sort((a,b)=>a-b);return s[Math.round(p*(s.length-1))];};
 function monteCarlo(N=40){
   const key=mcKey();if(mc&&mc.key===key)return mc;
-  const S={agents,edges,posts,history,events,round,maxRounds,concernCount,finished,postId,seed,KW,TOPIC,IDEA,READ};
-  const R=round||maxRounds,evs=events.slice(),n=agents.length,res=[],t0=performance.now();
-  headless=true;
-  try{for(let k=0;k<N;k++){build(S.IDEA,n,1000003+k*7919);maxRounds=R;
-      const due=r=>evs.forEach(e=>{if(e.round===r){events.push({...e});applyEvent(e);}});
-      for(;;){due(round);if(round>=R)break;step();}
-      const s=stats();res.push({sup:s.sup,opp:s.opp});}}
-  finally{headless=false;({agents,edges,posts,history,events,round,maxRounds,concernCount,finished,postId,seed,KW,TOPIC,IDEA,READ}=S);}
-  const sups=res.map(r=>r.sup).sort((a,b)=>a-b),q=p=>sups[Math.round(p*(N-1))],bins=Array(10).fill(0);
+  const R=round||maxRounds,t0=performance.now(),res=crowds({idea:IDEA,n:agents.length,rounds:R,mix:MIX,events:events.slice()},N);
+  const sups=res.map(r=>r.sup),bins=Array(10).fill(0);
   res.forEach(r=>bins[Math.min(9,Math.floor(r.sup*10))]++);
-  return mc={key,N,rounds:R,p10:q(.1),p50:q(.5),p90:q(.9),wins:res.filter(r=>r.sup>r.opp).length,bins,ms:performance.now()-t0,cur:history.at(-1).sup};
+  return mc={key,N,rounds:R,p10:quant(sups,.1),p50:quant(sups,.5),p90:quant(sups,.9),wins:res.filter(r=>r.sup>r.opp).length,bins,ms:performance.now()-t0,cur:history.at(-1).sup};
 }
+
+/* ---------- benchmark: real votes the model has to match ----------
+   Results checked against the sources linked in the table (Nov 2026). The model is not fitted to these cases:
+   each idea is typed in as plain text and run with the balanced crowd. Model "yes" = support / (support + oppose),
+   i.e. the decided agents, which is what a vote counts. */
+const BENCH=[
+ {place:"Stockholm",year:2006,idea:"Stockholm will charge drivers a congestion tax to enter the city centre on weekdays, after a seven-month trial",yes:53,src:"https://en.wikipedia.org/wiki/Stockholm_congestion_tax",note:"city referendum, advisory"},
+ {place:"Edinburgh",year:2005,idea:"Edinburgh will charge drivers £2 a day to enter the city centre, with the money spent on public transport",yes:25.6,src:"https://en.wikipedia.org/wiki/Edinburgh_congestion_charge"},
+ {place:"Greater Manchester",year:2008,idea:"Greater Manchester will charge drivers up to £5 a day at peak times to fund £3 billion of new public transport",yes:21,src:"https://en.wikipedia.org/wiki/Greater_Manchester_congestion_charge",note:"79% no as reported at the count"},
+ {place:"Gothenburg",year:2014,idea:"Gothenburg will keep charging a congestion tax on cars entering the city to fund a new rail tunnel",yes:43,src:"https://www.sverigesradio.se/artikel/5966019",note:"advisory"},
+ {place:"Switzerland",year:2016,idea:"Switzerland will pay every adult an unconditional basic income of 2,500 francs a month",yes:23.1,src:"https://en.wikipedia.org/wiki/2016_Swiss_referendums"},
+ {place:"Switzerland",year:2012,idea:"Every employee in Switzerland gets six weeks of paid holiday a year instead of four",yes:33.5,src:"https://en.wikipedia.org/wiki/2012_Swiss_referendums"},
+ {place:"Switzerland",year:2014,idea:"Switzerland introduces a national minimum wage of 22 francs an hour",yes:23.7,src:"https://www.swissinfo.ch/eng/swiss-say-no-to-world-s-highest-minimum-wage/38543758"},
+ {place:"Berlin",year:2021,idea:"Berlin will expropriate large landlords owning more than 3,000 apartments and turn the homes into public housing",yes:59.1,src:"https://en.wikipedia.org/wiki/Deutsche_Wohnen_%26_Co._enteignen",note:"non-binding"},
+ {place:"Switzerland",year:2021,idea:"Switzerland raises fuel and flight taxes to cut CO2 emissions in line with the Paris agreement",yes:48.4,src:"https://www.swissinfo.ch/eng/politics/vote-results--june-13-2021-switzerland-co2-pesticides/46631396"}
+];
+let benchRes=null;
+function runBenchmark(){const N=20;
+  benchRes=BENCH.map(b=>{const r=crowds({idea:b.idea,n:48,rounds:20,mix:{id:"balanced",custom:null},events:[]},N),ys=r.map(x=>x.yes*100);
+    const m=quant(ys,.5);return{...b,m,lo:quant(ys,.1),hi:quant(ys,.9),err:m-b.yes,call:(m>=50)===(b.yes>=50)};});
+  return benchRes;}
+function renderBench(){const el=$("#benchOut");
+  if(!benchRes){el.innerHTML=`<button class="btn sm" id="benchRun">${L("Run the benchmark (9 real votes × 20 crowds)","Uruchom test (9 prawdziwych głosowań × 20 tłumów)")}</button>`;return;}
+  const mae=benchRes.reduce((s,b)=>s+Math.abs(b.err),0)/benchRes.length,naive=benchRes.reduce((s,b)=>s+Math.abs(50-b.yes),0)/benchRes.length,calls=benchRes.filter(b=>b.call).length;
+  el.innerHTML=`<p class="verdict sm">${L(`Average miss: <b>${mae.toFixed(1)} pts</b> (always guessing 50% would miss by ${naive.toFixed(1)}). Right side of 50% in <b>${calls} of ${benchRes.length}</b> votes.`,`Średni błąd: <b>${mae.toFixed(1)} pkt</b> (zgadywanie zawsze 50% myli się o ${naive.toFixed(1)}). Właściwa strona 50% w <b>${calls} z ${benchRes.length}</b> głosowań.`)}${mae>naive?L(` <b>So on real votes this model does worse than a blind 50% guess</b> — treat its numbers as an illustration of crowd dynamics, not a prediction.`,` <b>Czyli na prawdziwych głosowaniach model wypada gorzej niż ślepe 50%</b> — traktuj jego liczby jako ilustrację dynamiki tłumu, nie prognozę.`):""}</p>
+   <div class="tscroll"><table class="cmp"><tr><th>${L("Vote","Głosowanie")}</th><th>${L("Real yes","Naprawdę za")}</th><th>${L("Model yes","Model za")}</th><th>${L("Miss","Błąd")}</th></tr>${benchRes.map(b=>`<tr><td><a href="${b.src}" target="_blank" rel="noopener">${b.place} ${b.year}</a><br><span class="hint">${esc(b.idea)}${b.note?` · ${b.note}`:""}</span></td><td class="n">${b.yes}%</td><td class="n">${Math.round(b.m)}%<br><span class="hint">${Math.round(b.lo)}–${Math.round(b.hi)}%</span></td><td class="n" style="color:${b.call?"var(--pos)":"var(--neg)"}">${b.err>0?"+":""}${b.err.toFixed(0)}${b.call?"":" ✗"}</td></tr>`).join("")}</table></div>
+   <p class="hint">${L("Model yes = share of decided agents who support it, median of 20 crowds (range: 10th–90th percentile). Real votes have campaigns, turnout and local politics this model knows nothing about. Read this as a sanity check, not as accuracy.","Model za = odsetek zdecydowanych osób, które popierają pomysł, mediana z 20 tłumów (przedział: 10.–90. percentyl). Pomysły wpisane po angielsku, tak jak model je czyta. Prawdziwe głosowania mają kampanie, frekwencję i lokalną politykę, o których model nic nie wie. To test zdrowego rozsądku, nie miara trafności.")}</p>`;}
+
+/* ---------- variant advisor: which softener moves the crowd most ---------- */
+let advice=null;
+function variantsFor(idea){const low=idea.toLowerCase(),r=readIdea(low),base=idea.replace(/[.!?\s]+$/,"");
+  return MODS.filter(m=>!m.re.test(low)&&(!m.restrictive||r.frame<0||r.mixed)).map(m=>({mod:m,idea:`${base}, ${ideaIsPl(idea)?MOD_PL[m.label][1]:m.clause}`}));}
+const ideaIsPl=t=>/[ąćęłńśźż]/i.test(t)||/(^|\s)(się|dla|przez|oraz|jest|będzie|każdy|od|na|w|z)(\s|$)/i.test(t);
+function runAdvisor(){const N=20,o={n:agents.length,rounds:Math.max(round,10),mix:MIX,events:[]};
+  const cur=crowds({...o,idea:IDEA},N),cy=quant(cur.map(x=>x.sup),.5);
+  advice={key:IDEA+"|"+mixKey(MIX),cur:cy,list:variantsFor(IDEA).map(v=>{const r=crowds({...o,idea:v.idea},N),s=quant(r.map(x=>x.sup),.5),op=quant(r.map(x=>x.opp),.5);
+    return{...v,sup:s,opp:op,d:s-cy};}).sort((a,b)=>b.d-a.d)};return advice;}
+function renderAdvisor(){const el=$("#advOut"),key=IDEA+"|"+mixKey(MIX);
+  if(!advice||advice.key!==key){el.innerHTML=`<p class="hint">${L("Tests how the same plan does if it is introduced differently — a pilot first, exemptions, money given back, phased in… Each variant runs 20 crowds.","Sprawdza, jak wypada ten sam plan wprowadzony inaczej — najpierw pilotaż, zwolnienia, pieniądze wracają do ludzi, stopniowo… Każdy wariant to 20 tłumów.")}</p><button class="btn sm" id="advRun">${L("Test the variants","Sprawdź warianty")}</button>`;return;}
+  if(!advice.list.length){el.innerHTML=`<p class="hint">${L("Your idea already includes every softener Swarmcast knows.","Twój pomysł zawiera już wszystkie złagodzenia, które Swarmcast zna.")}</p>`;return;}
+  el.innerHTML=`<ul class="list">${advice.list.map((v,i)=>`<li class="adv"><span><b>${modL(v.mod.label)}</b><br><span class="hint">…${esc(ideaIsPl(IDEA)?MOD_PL[v.mod.label][1]:v.mod.clause)}</span></span><span class="advn"><b style="color:${v.d>.005?"var(--pos)":v.d<-.005?"var(--neg)":"var(--mute)"}">${pts(v.d)}</b><br>${pc(v.sup)} ${L("for","za")}</span><button class="btn ghost sm" data-variant="${i}">${L("Run it","Uruchom")}</button></li>`).join("")}</ul>
+   <p class="hint">${L(`Median support of 20 crowds vs ${pc(advice.cur)} for your current wording (no events). “Run it” pins this run as the baseline and starts the variant.`,`Mediana poparcia z 20 tłumów wobec ${pc(advice.cur)} dla obecnego brzmienia (bez wydarzeń). „Uruchom” przypina tę symulację jako bazę i liczy wariant.`)}</p>`;}
 
 /* ---------- saved runs: recent list + baseline for comparison ---------- */
 const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
@@ -480,128 +673,149 @@ function saveRecent(){const s=history.at(-1),l=LS.get("swarmcast.recent",[]).fil
   l.unshift({idea:IDEA,a:agents.length,r:maxRounds,sup:s.sup,opp:s.opp});LS.set("swarmcast.recent",l.slice(0,6));}
 function renderRecent(){const l=LS.get("swarmcast.recent",[]).filter(r=>r&&typeof r.idea==="string");
   $("#recent").classList.toggle("hide",!l.length);
-  $("#recentList").innerHTML=l.map((r,i)=>`<button class="chip" data-recent="${i}" title="${esc(r.idea)}">${esc(r.idea.length>58?r.idea.slice(0,32)+" … "+r.idea.slice(-22):r.idea)}<small>${pc(+r.sup||0)} for</small></button>`).join("");}
+  $("#recentList").innerHTML=l.map((r,i)=>`<button class="chip" data-recent="${i}" title="${esc(r.idea)}">${esc(r.idea.length>58?r.idea.slice(0,32)+" … "+r.idea.slice(-22):r.idea)}<small>${pc(+r.sup||0)} ${L("for","za")}</small></button>`).join("");}
 
 /* ---------- loop ---------- */
 function tick(){clearTimeout(timer);if(!paused&&!finished&&agents.length)step();timer=setTimeout(tick,700/speed);}
-function extend(n){maxRounds+=n;finished=false;$("#pause").disabled=false;$("#pause").textContent="Pause";paused=false;refresh();}
+function extend(n){maxRounds+=n;finished=false;$("#pause").disabled=false;paused=false;refresh();}
 
 /* ---------- interventions ---------- */
+/* every intervention is logged with its round, so a saved run can be replayed exactly */
+let actions=[],quiet=false,openingRun=false;
 function injectEvent(text,tone,group,str){
-  text=text.trim();if(!text)return toast("Write the news first");
+  text=String(text).trim().slice(0,160);if(!text)return toast(L("Write the news first","Najpierw wpisz wiadomość"));
+  actions.push({t:"event",round,text,tone,group,str});
   const ev={round,text:esc(text),tone,group,str};events.push(ev);
   const n=applyEvent(ev);
   posts.push({id:postId++,by:null,news:true,text:ev.text,tone,group,round,likes:0,mood:tone>0?"Supportive":"Skeptical",concern:null});
   history[history.length-1]=stats();
-  toast(`Event reached ${n} people`);refresh();
+  if(!quiet){toast(L(`Event reached ${n} people`,`Wydarzenie dotarło do ${n} osób`));refresh();}
 }
 function applyEvent(ev){let n=0;agents.forEach(a=>{if(ev.group==="All"||a.group===ev.group){a.op=clamp(a.op+ev.tone*.07*ev.str*(1-a.stub*.7)*(.6+rnd()*.8),-1,1);a.flash=1;n++;}});return n;}
 function nudge(a,v){a.op=clamp(v,-1,1);a.nudged=true;a.flash=1;history[history.length-1]=stats();refresh(true);}
-function boost(p){if(p.boosted||p.by==null)return;p.boosted=true;const src=agents[p.by];src.inf=clamp(src.inf+.08,0,1);influence(src,p,2.5);src.flash=1;
-  history[history.length-1]=stats();toast(`Boosted ${src.name.split(" ")[0]}'s post`);refresh();}
+function boost(p){if(!p||p.boosted||p.by==null)return;p.boosted=true;actions.push({t:"boost",round,post:p.id});const src=agents[p.by];src.inf=clamp(src.inf+.08,0,1);influence(src,p,2.5);src.flash=1;
+  history[history.length-1]=stats();if(!quiet){toast(L(`Boosted ${src.name.split(" ")[0]}'s post`,`Podbito post: ${src.name.split(" ")[0]}`));refresh();}}
 
 /* ---------- rendering ---------- */
 const av=a=>`<div class="av" style="background:${a.color}">${esc(a.name[0])}</div>`;
-const moodTag=m=>`<span class="mood" style="color:${MOODS[m].c};background:${MOODS[m].bg}">${m}</span>`;
+const moodTag=m=>`<span class="mood" style="color:${MOODS[m].c};background:${MOODS[m].bg}">${moodL(m)}</span>`;
+const pts=v=>{const p=Math.round(v*100);return`${p>0?"+":p<0?"−":"±"}${Math.abs(p)} ${L("pts","pkt")}`;};
 function postHTML(p){
-  if(p.news)return`<div class="post news${p.round===round?" new":""}"><div class="ph"><div class="av" style="background:#c6ff3d;color:#0b0d0c">!</div><div><b>Breaking news</b><br><small>${p.tone>0?"good":"bad"} news · reaches ${esc(p.group)} · round ${p.round}</small></div></div><p>${p.text}</p></div>`;
+  if(p.news)return`<div class="post news${p.round===round?" new":""}"><div class="ph"><div class="av" style="background:#c6ff3d;color:#0b0d0c">!</div><div><b>${L("Breaking news","Pilna wiadomość")}</b><br><small>${p.tone>0?L("good news","dobra wiadomość"):L("bad news","zła wiadomość")} · ${L("reaches","dociera do")} ${esc(groupL(p.group))} · ${L("round","runda")} ${p.round}</small></div></div><p>${p.text}</p></div>`;
   const a=agents[p.by];
-  return`<div class="post${p.reply?" reply":""}${p.round===round?" new":""}"><div class="ph who" data-a="${a.id}">${av(a)}<div><b>${esc(a.name)}</b><br><small>${a.role} · round ${p.round}</small></div>${moodTag(p.mood)}</div>
-  <p>${p.text}</p><div class="meta"><span>♥ ${p.likes}</span><span>${a.followers} followers</span>${p.concern?`<span>⚑ ${p.concern}</span>`:""}<span class="spacer"></span><button data-boost="${p.id}" class="${p.boosted?"done":""}">${p.boosted?"Boosted":"Boost ↑"}</button></div></div>`;
+  return`<div class="post${p.reply?" reply":""}${p.round===round?" new":""}"><div class="ph who" data-a="${a.id}">${av(a)}<div><b>${esc(a.name)}</b><br><small>${roleL(a.role)} · ${L("round","runda")} ${p.round}</small></div>${moodTag(p.mood)}</div>
+  <p>${p.text}${p.ai?`<span class="ai-badge" title="${L("Written by Claude from this persona and its stance","Napisane przez Claude na podstawie persony i jej nastawienia")}">AI</span>`:""}</p><div class="meta"><span>♥ ${p.likes}</span><span>${a.followers} ${L("followers","obserwujących")}</span>${p.concern?`<span>⚑ ${ct(p.concern)}</span>`:""}<span class="spacer"></span><button data-boost="${p.id}" class="${p.boosted?"done":""}">${p.boosted?L("Boosted","Podbity"):L("Boost ↑","Podbij ↑")}</button></div></div>`;
 }
 function renderFeed(){
   const q=filt.q.toLowerCase();
   let list=posts.filter(p=>(viewRound==null||p.round<=viewRound)&&(!filt.mood||p.mood===filt.mood&&!p.news)&&(!filt.concern||p.concern===filt.concern)&&(filt.author==null||p.by===filt.author)&&(!q||p.text.toLowerCase().includes(q)||(p.by!=null&&agents[p.by].name.toLowerCase().includes(q))));
   const total=list.length;list=list.slice(-80).reverse();
   const f=$("#feed"),top=f.scrollTop;
-  f.innerHTML=list.map(postHTML).join("")||`<div class="empty">${posts.length?"No posts match this filter.":"The crowd is warming up…"}</div>`;
+  f.innerHTML=list.map(postHTML).join("")||`<div class="empty">${posts.length?L("No posts match this filter.","Żaden post nie pasuje do filtra."):L("The crowd is warming up…","Tłum się rozgrzewa…")}</div>`;
   f.scrollTop=top;
-  const bits=[];if(filt.concern)bits.push(`concern: ${CONCERN_TXT[filt.concern]}`);if(filt.author!=null)bits.push(`author: ${esc(agents[filt.author].name)}`);
+  const bits=[];if(filt.concern)bits.push(`${L("concern","obawa")}: ${ct(filt.concern)}`);if(filt.author!=null)bits.push(`${L("author","autor")}: ${esc(agents[filt.author].name)}`);
   $("#filterbar").classList.toggle("on",bits.length>0);
-  $("#filterbar").innerHTML=bits.length?`Showing ${total} posts · ${bits.join(" · ")} <button id="clearF">clear</button>`:"";
+  $("#filterbar").innerHTML=bits.length?`${L("Showing","Widać")} ${total} ${L("posts","postów")} · ${bits.join(" · ")} <button id="clearF">${L("clear","wyczyść")}</button>`:"";
   const counts={};posts.forEach(p=>{if(!p.news)counts[p.mood]=(counts[p.mood]||0)+1});
-  $("#moodChips").innerHTML=Object.keys(MOODS).map(m=>`<button class="chip${filt.mood===m?" on":""}" data-mood="${m}">${m} ${counts[m]||0}</button>`).join("");
+  $("#moodChips").innerHTML=Object.keys(MOODS).map(m=>`<button class="chip${filt.mood===m?" on":""}" data-mood="${m}">${moodL(m)} ${counts[m]||0}</button>`).join("");
 }
 function updateStatus(){const s=history.at(-1);$("#kRound").textContent=`${round}/${maxRounds}`;$("#kPosts").textContent=posts.length;
-  $("#kSup").textContent=Math.round(s.sup*100)+"%";$("#kMood").textContent=sgn(s.mean);$("#progBar").style.width=round/maxRounds*100+"%";}
-function pcard(a,withSlider){return`<div class="pcard${selected===a?" sel":""}" data-id="${a.id}"><div class="ph">${av(a)}<div><b>${esc(a.name)}</b><br><small>${a.role} · ${a.group}</small></div>${moodTag(moodOf(a.op,a.emo))}</div>
- <div class="handle">${a.handle}${a.nudged?" · <span style='color:var(--mute)'>nudged by you</span>":""}</div><div class="bio">${a.bio}</div><div class="tags">${a.traits.map(t=>`<span class="tag">${t}</span>`).join("")}${a.concerns.map(t=>`<span class="tag">⚑ ${t}</span>`).join("")}<span class="tag">${a.posts} posts</span></div>
- ${withSlider?`<div class="slider"><span>oppose</span><input type="range" min="-100" max="100" value="${Math.round(a.op*100)}" data-nudge="${a.id}"><span>support</span></div>`:
+  $("#kSup").textContent=Math.round(s.sup*100)+"%";$("#kMood").textContent=sgn(s.mean);$("#progBar").style.width=round/maxRounds*100+"%";
+  $("#pause").textContent=finished?L("Done ✓","Gotowe ✓"):paused?L("Resume","Wznów"):L("Pause","Pauza");}
+function pcard(a,withSlider){return`<div class="pcard${selected===a?" sel":""}" data-id="${a.id}"><div class="ph">${av(a)}<div><b>${esc(a.name)}</b><br><small>${roleL(a.role)} · ${groupL(a.group)}</small></div>${moodTag(moodOf(a.op,a.emo))}</div>
+ <div class="handle">${a.handle}${a.nudged?` · <span style='color:var(--mute)'>${L("nudged by you","zmienione przez ciebie")}</span>`:""}</div><div class="bio">${bioL(a)}</div><div class="tags">${a.traits.map(t=>`<span class="tag">${traitL(t)}</span>`).join("")}${a.concerns.map(t=>`<span class="tag">⚑ ${ct(t)}</span>`).join("")}<span class="tag">${a.posts} ${L("posts","postów")}</span></div>
+ ${withSlider?`<div class="slider"><span>${L("oppose","przeciw")}</span><input type="range" min="-100" max="100" value="${Math.round(a.op*100)}" data-nudge="${a.id}"><span>${L("support","za")}</span></div>`:
  `<div class="slider"><span style="font-family:var(--mono);color:${colOf(a.op)}">${sgn(a.op)}</span></div>`}</div>`;}
 function personaList(){const q=$("#pq").value.toLowerCase(),g=$("#pg").value,s=$("#ps").value;
-  let l=agents.filter(a=>(g==="All"||a.group===g)&&(!q||(a.name+" "+a.role+" "+a.traits.join(" ")+" "+a.concerns.join(" ")).toLowerCase().includes(q)));
+  let l=agents.filter(a=>(g==="All"||a.group===g)&&(!q||(a.name+" "+a.role+" "+roleL(a.role)+" "+a.traits.map(t=>t+" "+traitL(t)).join(" ")+" "+a.concerns.map(c=>c+" "+ct(c)).join(" ")).toLowerCase().includes(q)));
   const key={inf:a=>-a.inf,op:a=>-a.op,"-op":a=>a.op,shift:a=>-Math.abs(a.op-a.op0),posts:a=>-a.posts}[s];
   return l.sort((a,b)=>key(a)-key(b));}
-function renderPersonas(){$("#plist").innerHTML=personaList().map(a=>pcard(a,true)).join("")||'<div class="empty">Nobody matches.</div>';}
+function renderPersonas(){$("#plist").innerHTML=personaList().map(a=>pcard(a,true)).join("")||`<div class="empty">${L("Nobody matches.","Nikt nie pasuje.")}</div>`;}
 function renderPick(){$("#pick").innerHTML=agents.slice().sort((a,b)=>b.inf-a.inf).map(a=>pcard(a,false)).join("");}
 function renderSel(){const c=$("#selcard");if(!selected){c.classList.remove("open");return;}const a=selected;
   c.classList.add("open");
-  c.innerHTML=`<div class="ph">${av(a)}<div><b>${esc(a.name)}</b><br><small style="color:var(--mute)">${a.role} · ${a.group} · ${a.followers} followers · follows ${a.following.length}</small></div>${moodTag(moodOf(a.op,a.emo))}</div>
-  <div class="slider"><span>oppose</span><input type="range" min="-100" max="100" value="${Math.round(a.op*100)}" data-nudge="${a.id}"><span>support</span><b style="font-family:var(--mono);color:${colOf(a.op)}">${sgn(a.op)}</b></div>
-  <div class="row" style="margin-top:8px"><button class="btn sm" data-act="interview">Interview</button><button class="btn ghost sm" data-act="posts">Show their posts</button><button class="btn ghost sm" data-act="close">Close</button></div>`;}
-function renderGChips(){$("#gchips").innerHTML=`<span style="font-size:12px;color:var(--mute)">Highlight:</span>`+["All",...GROUPS].map(g=>`<button class="chip${(hiGroup||"All")===g?" on":""}" data-g="${g}">${g}</button>`).join("");}
+  c.innerHTML=`<div class="ph">${av(a)}<div><b>${esc(a.name)}</b><br><small style="color:var(--mute)">${roleL(a.role)} · ${groupL(a.group)} · ${a.followers} ${L("followers","obserwujących")} · ${L("follows","obserwuje")} ${a.following.length}</small></div>${moodTag(moodOf(a.op,a.emo))}</div>
+  <div class="slider"><span>${L("oppose","przeciw")}</span><input type="range" min="-100" max="100" value="${Math.round(a.op*100)}" data-nudge="${a.id}"><span>${L("support","za")}</span><b style="font-family:var(--mono);color:${colOf(a.op)}">${sgn(a.op)}</b></div>
+  <div class="row" style="margin-top:8px"><button class="btn sm" data-act="interview">${L("Interview","Wywiad")}</button><button class="btn ghost sm" data-act="posts">${L("Show their posts","Pokaż posty")}</button><button class="btn ghost sm" data-act="close">${L("Close","Zamknij")}</button></div>`;}
+function renderGChips(){$("#gchips").innerHTML=`<span style="font-size:12px;color:var(--mute)">${L("Highlight:","Podświetl:")}</span>`+["All",...GROUPS].map(g=>`<button class="chip${(hiGroup||"All")===g?" on":""}" data-g="${g}">${groupL(g)}</button>`).join("");}
 
+const DOM_PL={transport:"transport",pricing:"ceny",education:"edukacja",work:"praca",devices:"urządzenia","data & AI":"dane i AI",environment:"środowisko",health:"zdrowie",housing:"mieszkania"};
+const MOD_PL={"pilot first":["najpierw pilotaż","zaczynając od 6-miesięcznego pilotażu, ocenianego przed wprowadzeniem na stałe"],exemptions:["zwolnienia","ze zwolnieniami dla mieszkańców i gospodarstw o niskich dochodach"],
+ "money given back":["pieniądze wracają do ludzi","a każdy zebrany grosz wraca w postaci tańszych usług publicznych"],voluntary:["dobrowolnie","jako dobrowolny program dla chętnych"],
+ "phased in":["stopniowo","wprowadzane stopniowo przez trzy lata"],"public consultation":["konsultacje społeczne","po konsultacjach społecznych i panelu obywatelskim"]};
+const modL=l=>LANG==="pl"?MOD_PL[l]?.[0]||l:l;
 function readSummary(){const R=READ,ent=Object.entries(R.fx).sort((a,b)=>a[1]-b[1]);
-  return{frame:R.mixed?"mixed (a cost and a benefit)":R.frame<0?"restrictive":R.frame>0?"generous":"neutral",doms:R.doms,
-    against:ent.filter(e=>e[1]<-.08).slice(0,2).map(e=>e[0]+"s"),forr:ent.filter(e=>e[1]>.08).reverse().slice(0,2).map(e=>e[0]+"s")};}
+  return{frame:R.mixed?"mixed (a cost and a benefit)":R.frame<0?"restrictive":R.frame>0?"generous":"neutral",doms:R.doms,mods:R.mods||[],
+    against:ent.filter(e=>e[1]<-.08).slice(0,2).map(e=>e[0]+"s"),forr:ent.filter(e=>e[1]>.08).reverse().slice(0,2).map(e=>e[0]+"s"),
+    againstR:ent.filter(e=>e[1]<-.08).slice(0,2).map(e=>e[0]),forrR:ent.filter(e=>e[1]>.08).reverse().slice(0,2).map(e=>e[0])};}
+const FRAME_PL={"mixed (a cost and a benefit)":"mieszane (koszt i korzyść)",restrictive:"ograniczające",generous:"korzystne",neutral:"neutralne"};
 function renderRead(){const r=readSummary();
-  $("#readOut").innerHTML=`<span>Read from your idea:</span>${(r.doms.length?r.doms:["no specific topic"]).map(d=>`<span class="tag">${d}</span>`).join("")}<span class="tag">${r.frame} framing</span>`+
-    (r.against.length?`<span>hit hardest: <b>${r.against.join(", ")}</b></span>`:"")+(r.forr.length?`<span>most on board: <b>${r.forr.join(", ")}</b></span>`:"")+
-    (r.doms.length||READ.frame||READ.mixed?"":`<span>· everyone starts from their general temperament</span>`);}
+  $("#readOut").innerHTML=`<span>${L("Read from your idea:","Odczytane z pomysłu:")}</span>${(r.doms.length?r.doms.map(d=>L(d,DOM_PL[d]||d)):[L("no specific topic","brak konkretnego tematu")]).map(d=>`<span class="tag">${d}</span>`).join("")}<span class="tag">${L(r.frame+" framing","ujęcie: "+FRAME_PL[r.frame])}</span>`+
+    (r.mods.length?`<span>${L("softened by","złagodzone przez")}: <b>${r.mods.map(modL).join(", ")}</b></span>`:"")+
+    (r.againstR.length?`<span>${L("hit hardest","najmocniej dotknięci")}: <b>${r.againstR.map(rolesL).join(", ")}</b></span>`:"")+(r.forrR.length?`<span>${L("most on board","najbardziej za")}: <b>${r.forrR.map(rolesL).join(", ")}</b></span>`:"")+
+    (r.doms.length||READ.frame||READ.mixed?"":`<span>· ${L("everyone starts from their general temperament","każdy zaczyna od swojego ogólnego temperamentu")}</span>`);}
 let viewRound=null,replayT=null,replayWasPaused=false;
 const opNow=a=>viewRound!=null?history[viewRound].ops[a.id]:a.op;
 function renderScrub(){const s=$("#scrub");s.max=round;s.value=viewRound??round;const h=history[viewRound??round];
   $("#graph").classList.toggle("past",viewRound!=null);
-  $("#scrubLbl").innerHTML=viewRound==null?`<b>live</b> · round ${round}`:`round <b>${viewRound}</b> of ${round} · ${pc(h.sup)} for, ${pc(h.opp)} against · <button class="lnk" id="goLive">back to live</button>`;
-  $("#replay").textContent=replayT?"■ Stop":"▶ Replay";}
+  $("#scrubLbl").innerHTML=viewRound==null?`<b>${L("live","na żywo")}</b> · ${L("round","runda")} ${round}`:`${L("round","runda")} <b>${viewRound}</b> ${L("of","z")} ${round} · ${pc(h.sup)} ${L("for","za")}, ${pc(h.opp)} ${L("against","przeciw")} · <button class="lnk" id="goLive">${L("back to live","wróć na żywo")}</button>`;
+  $("#replay").textContent=replayT?L("■ Stop","■ Stop"):L("▶ Replay","▶ Powtórka");}
 function setView(v){viewRound=v==null||v>=round?null:Math.max(0,v);renderScrub();renderFeed();}
-function stopReplay(){if(!replayT)return;clearInterval(replayT);replayT=null;if(!replayWasPaused&&!finished){paused=false;$("#pause").textContent="Pause";}renderScrub();}
-function startReplay(){if(replayT)return stopReplay();if(round<1)return toast("Nothing to replay yet");
-  replayWasPaused=paused;paused=true;if(!finished)$("#pause").textContent="Resume";viewRound=0;
+function stopReplay(){if(!replayT)return;clearInterval(replayT);replayT=null;if(!replayWasPaused&&!finished)paused=false;updateStatus();renderScrub();}
+function startReplay(){if(replayT)return stopReplay();if(round<1)return toast(L("Nothing to replay yet","Nie ma jeszcze czego odtwarzać"));
+  replayWasPaused=paused;paused=true;updateStatus();viewRound=0;
   replayT=setInterval(()=>{if(viewRound==null||viewRound>=round-1){setView(null);stopReplay();return;}setView(viewRound+1);},clamp(4000/round,70,400));
   renderScrub();renderFeed();}
 function renderMC(){const el=$("#mcOut");
   if(!(mc&&mc.key===mcKey())&&(finished||paused))monteCarlo();
-  const fresh=mc&&mc.key===mcKey();
-  const m=mc;
-  if(!m){el.innerHTML=`<p class="hint">One run is one random crowd. Swarmcast can replay your idea with 40 different crowds to show how much the result depends on luck. It runs automatically when the simulation is paused or finished.</p><button class="btn sm" id="mcRun">Run 40 alternate crowds now</button>`;return;}
-  const spread=m.p90-m.p10,conf=spread<.12?"fairly stable":spread<.25?"moderately uncertain":"highly uncertain — it depends a lot on who is in the crowd";
+  const fresh=mc&&mc.key===mcKey(),m=mc;
+  if(!m){el.innerHTML=`<p class="hint">${L("One run is one random crowd. Swarmcast can replay your idea with 40 different crowds to show how much the result depends on luck. It runs automatically when the simulation is paused or finished.","Jedna symulacja to jeden losowy tłum. Swarmcast może puścić pomysł na 40 innych tłumach, żeby pokazać, ile w wyniku jest przypadku. Liczy się samo po pauzie albo na końcu symulacji.")}</p><button class="btn sm" id="mcRun">${L("Run 40 alternate crowds now","Policz 40 innych tłumów teraz")}</button>`;return;}
+  const spread=m.p90-m.p10,conf=spread<.12?L("fairly stable","dość stabilna"):spread<.25?L("moderately uncertain","umiarkowanie niepewna"):L("highly uncertain — it depends a lot on who is in the crowd","bardzo niepewna — dużo zależy od tego, kto jest w tłumie");
   const mx=Math.max(...m.bins,1),cb=Math.min(9,Math.floor(m.cur*10));
   const bars=m.bins.map((b,i)=>`<rect x="${i*30+2}" y="${62-b/mx*52}" width="26" height="${Math.max(1,b/mx*52)}" rx="3" fill="${i===cb?"#c6ff3d":"#6be37a88"}"/><text x="${i*30+15}" y="76" fill="#8d978f" font-size="8" text-anchor="middle">${i*10}%</text>`).join("");
-  el.innerHTML=`<p class="verdict sm">In 8 of 10 alternate crowds support lands between <b>${pc(m.p10)}</b> and <b>${pc(m.p90)}</b> (median ${pc(m.p50)}). Support beats opposition in <b>${m.wins} of ${m.N}</b>. The forecast is ${conf}.</p>
-   <svg viewBox="0 0 300 80" width="100%" height="90" role="img" aria-label="Distribution of support across alternate crowds">${bars}</svg>
-   <div class="hint">Bars: how many of the ${m.N} crowds ended at each support level after ${m.rounds} rounds. Highlighted: the bar your run falls in (${pc(m.cur)}). Same idea and same events — different random people and connections; your nudges and boosts are not replayed.${fresh?"":` <b>As of an earlier round</b> — updates when you pause.`}</div>`;}
+  el.innerHTML=`<p class="verdict sm">${L(`In 8 of 10 alternate crowds support lands between <b>${pc(m.p10)}</b> and <b>${pc(m.p90)}</b> (median ${pc(m.p50)}). Support beats opposition in <b>${m.wins} of ${m.N}</b>. The forecast is ${conf}.`,
+      `W 8 na 10 innych tłumów poparcie wypada między <b>${pc(m.p10)}</b> a <b>${pc(m.p90)}</b> (mediana ${pc(m.p50)}). Poparcie wygrywa ze sprzeciwem w <b>${m.wins} z ${m.N}</b>. Prognoza jest ${conf}.`)}</p>
+   <svg viewBox="0 0 300 80" width="100%" height="90" role="img" aria-label="${L("Distribution of support across alternate crowds","Rozkład poparcia w innych tłumach")}">${bars}</svg>
+   <div class="hint">${L(`Bars: how many of the ${m.N} crowds ended at each support level after ${m.rounds} rounds. Highlighted: the bar your run falls in (${pc(m.cur)}). Same idea and same events — different random people and connections; your nudges and boosts are not replayed.`,
+      `Słupki: ile z ${m.N} tłumów skończyło na danym poziomie poparcia po ${m.rounds} rundach. Podświetlony: słupek twojej symulacji (${pc(m.cur)}). Ten sam pomysł i te same wydarzenia — inni losowi ludzie i powiązania; twoje zmiany zdania i podbicia nie są powtarzane.`)}${fresh?"":` <b>${L("As of an earlier round","Stan z wcześniejszej rundy")}</b> — ${L("updates when you pause.","odświeży się po pauzie.")}`}</div>`;}
 function renderCompare(){const el=$("#cmpOut"),s=history.at(-1);
-  if(!baseline){el.innerHTML=`<p class="hint">Pin this run, then change the idea (a lower price, a pilot first, an exemption for residents…) and run it again. Both forecasts then appear side by side here and on the chart.</p><button class="btn sm" id="pinBase">Pin as baseline</button>`;return;}
-  if(baseline.id===runId()){el.innerHTML=`<p class="hint">This run is your baseline (${pc(baseline.sup)} support, ${pc(baseline.opp)} against). Now click <b>New idea</b>, tweak the text and run a variant — the comparison shows up here.</p><button class="btn ghost sm" id="clearBase">Clear baseline</button>`;return;}
-  const d=(v,goodUp)=>{const p=Math.round(v*100);return`<b style="color:${p===0?"var(--mute)":(p>0)===goodUp?"var(--pos)":"var(--neg)"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} pts</b>`;};
-  el.innerHTML=`<table class="cmp"><tr><th></th><th>Idea</th><th>For</th><th>Against</th></tr>
-   <tr><td class="n" style="color:var(--mute)">baseline</td><td>${esc(baseline.idea)}</td><td class="n">${pc(baseline.sup)}</td><td class="n">${pc(baseline.opp)}</td></tr>
-   <tr><td class="n" style="color:var(--acc)">this run</td><td>${esc(IDEA)}</td><td class="n">${pc(s.sup)}</td><td class="n">${pc(s.opp)}</td></tr></table>
-   <p class="verdict sm">Versus the baseline: support ${d(s.sup-baseline.sup,true)}, opposition ${d(s.opp-baseline.opp,false)}.${baseline.band&&mc&&mc.key===mcKey()?` Alternate-crowd ranges: ${pc(baseline.band[0])}–${pc(baseline.band[1])} vs ${pc(mc.p10)}–${pc(mc.p90)}${mc.p10>baseline.band[1]||mc.p90<baseline.band[0]?" — they don't overlap, so the difference is not just luck.":" — they overlap, so part of the difference may be luck."}`:""}</p>
-   <div class="row"><button class="btn ghost sm" id="pinBase">Make this the baseline</button><button class="btn ghost sm" id="clearBase">Clear baseline</button></div>`;}
+  if(!baseline){el.innerHTML=`<p class="hint">${L("Pin this run, then change the idea (a lower price, a pilot first, an exemption for residents…) and run it again. Both forecasts then appear side by side here and on the chart.","Przypnij tę symulację, potem zmień pomysł (niższa cena, najpierw pilotaż, zwolnienie dla mieszkańców…) i puść go jeszcze raz. Obie prognozy pojawią się obok siebie tutaj i na wykresie.")}</p><button class="btn sm" id="pinBase">${L("Pin as baseline","Przypnij jako bazę")}</button>`;return;}
+  if(baseline.id===runId()){el.innerHTML=`<p class="hint">${L(`This run is your baseline (${pc(baseline.sup)} support, ${pc(baseline.opp)} against). Now click <b>New idea</b>, tweak the text and run a variant — the comparison shows up here.`,`Ta symulacja jest twoją bazą (${pc(baseline.sup)} za, ${pc(baseline.opp)} przeciw). Kliknij <b>Nowy pomysł</b>, popraw tekst i puść wariant — porównanie pojawi się tutaj.`)}</p><button class="btn ghost sm" id="clearBase">${L("Clear baseline","Usuń bazę")}</button>`;return;}
+  const d=(v,goodUp)=>{const p=Math.round(v*100);return`<b style="color:${p===0?"var(--mute)":(p>0)===goodUp?"var(--pos)":"var(--neg)"}">${pts(v)}</b>`;};
+  const ov=baseline.band&&mc&&mc.key===mcKey()?(mc.p10>baseline.band[1]||mc.p90<baseline.band[0]):null;
+  el.innerHTML=`<table class="cmp"><tr><th></th><th>${L("Idea","Pomysł")}</th><th>${L("For","Za")}</th><th>${L("Against","Przeciw")}</th></tr>
+   <tr><td class="n" style="color:var(--mute)">${L("baseline","baza")}</td><td>${esc(baseline.idea)}</td><td class="n">${pc(baseline.sup)}</td><td class="n">${pc(baseline.opp)}</td></tr>
+   <tr><td class="n" style="color:var(--acc)">${L("this run","teraz")}</td><td>${esc(IDEA)}</td><td class="n">${pc(s.sup)}</td><td class="n">${pc(s.opp)}</td></tr></table>
+   <p class="verdict sm">${L("Versus the baseline: support","W porównaniu z bazą: poparcie")} ${d(s.sup-baseline.sup,true)}, ${L("opposition","sprzeciw")} ${d(s.opp-baseline.opp,false)}.${ov==null?"":` ${L("Alternate-crowd ranges","Przedziały z innych tłumów")}: ${pc(baseline.band[0])}–${pc(baseline.band[1])} vs ${pc(mc.p10)}–${pc(mc.p90)}${ov?L(" — they don't overlap, so the difference is not just luck."," — nie nakładają się, więc różnica to nie tylko przypadek."):L(" — they overlap, so part of the difference may be luck."," — nakładają się, więc część różnicy może być przypadkiem.")}`}</p>
+   <div class="row"><button class="btn ghost sm" id="pinBase">${L("Make this the baseline","Ustaw to jako bazę")}</button><button class="btn ghost sm" id="clearBase">${L("Clear baseline","Usuń bazę")}</button></div>`;}
 function pinBaseline(){const s=history.at(-1),m=mc&&mc.key===mcKey()?mc:null;
   baseline={id:runId(),idea:IDEA,sup:s.sup,opp:s.opp,means:history.map(h=>+h.mean.toFixed(3)),band:m?[m.p10,m.p90]:null};
-  LS.set("swarmcast.baseline",baseline);toast("Pinned as baseline");renderReport();}
+  LS.set("swarmcast.baseline",baseline);toast(L("Pinned as baseline","Przypięte jako baza"));renderReport();}
 
-function renderReport(){
-  renderMC();
-  const s=history.at(-1),s0=history[0],und=1-s.sup-s.opp;
+function verdictText(){
+  const s=history.at(-1),s0=history[0],top=Object.entries(concernCount).sort((a,b)=>b[1]-a[1]),m=mc&&mc.key===mcKey()?mc:null;
+  if(LANG==="pl"){
+    const lean=s.sup>s.opp+.1?"ma szansę zostać <b>przyjęty</b>":s.opp>s.sup+.1?"trafi na <b>silny opór</b>":"<b>podzieli</b> ludzi";
+    const pol=s.sd>.55?"mocno spolaryzowany":s.sd>.38?"podzielony":"dość zgodny";
+    const trend=s.mean-s0.mean>.05?"z czasem się ociepla":s.mean-s0.mean<-.05?"z czasem się ochładza":"przez całą debatę się nie zmienia";
+    return`${finished?"Po":"Na razie, po"} ${round} rundach i ${posts.length} postach: ${topicL()} ${lean}. <b>${pc(s.sup)}</b> jest za, <b>${pc(s.opp)}</b> przeciw. Tłum jest ${pol}, a nastrój ${trend}.${top[0]?` Główna linia sporu: <b>${ct(top[0][0])}</b>.`:""}${events.length?` Twoje wydarzenia: ${events.length}.`:""}${m?` W ${m.N} innych tłumach poparcie wynosi <b>${pc(m.p10)}–${pc(m.p90)}</b>.`:""}`;}
   const lean=s.sup>s.opp+.1?"likely to be <b>accepted</b>":s.opp>s.sup+.1?"likely to meet <b>strong resistance</b>":"set to <b>split opinion</b>";
   const pol=s.sd>.55?"highly polarised":s.sd>.38?"divided":"fairly cohesive";
   const trend=s.mean-s0.mean>.05?"warming up over time":s.mean-s0.mean<-.05?"cooling down as the debate went on":"stable through the debate";
-  const top=Object.entries(concernCount).sort((a,b)=>b[1]-a[1]);
-  const evTxt=events.length?` You intervened with ${events.length} event${events.length>1?"s":""}.`:"";
-  $("#verdict").innerHTML=`${finished?"After":"So far, after"} ${round} rounds and ${posts.length} posts, ${TOPIC} is ${lean}. <b>${Math.round(s.sup*100)}%</b> support it, <b>${Math.round(s.opp*100)}%</b> oppose it. The crowd is ${pol} and ${trend}.${top[0]?` The main fault line is <b>${CONCERN_TXT[top[0][0]]}</b>.`:""}${evTxt}${mc&&mc.key===mcKey()?` Across ${mc.N} alternate crowds, support ranges <b>${pc(mc.p10)}–${pc(mc.p90)}</b>.`:""}`;
+  return`${finished?"After":"So far, after"} ${round} rounds and ${posts.length} posts, ${topicL()} is ${lean}. <b>${pc(s.sup)}</b> support it, <b>${pc(s.opp)}</b> oppose it. The crowd is ${pol} and ${trend}.${top[0]?` The main fault line is <b>${ct(top[0][0])}</b>.`:""}${events.length?` You intervened with ${events.length} event${events.length>1?"s":""}.`:""}${m?` Across ${m.N} alternate crowds, support ranges <b>${pc(m.p10)}–${pc(m.p90)}</b>.`:""}`;}
+function renderReport(){
+  renderMC();renderAdvisor();
+  const s=history.at(-1),und=1-s.sup-s.opp,top=Object.entries(concernCount).sort((a,b)=>b[1]-a[1]);
+  $("#verdict").innerHTML=verdictText();
   renderCompare();
   $("#stack").innerHTML=`<i style="width:${s.sup*100}%;background:var(--pos)"></i><i style="width:${und*100}%;background:var(--und)"></i><i style="width:${s.opp*100}%;background:var(--neg)"></i>`;
-  $("#stackLeg").innerHTML=`<span><i class="dot" style="background:var(--pos)"></i>Support ${Math.round(s.sup*100)}%</span><span><i class="dot" style="background:var(--und)"></i>Undecided ${Math.round(und*100)}%</span><span><i class="dot" style="background:var(--neg)"></i>Oppose ${Math.round(s.opp*100)}%</span>`;
+  $("#stackLeg").innerHTML=`<span><i class="dot" style="background:var(--pos)"></i>${L("Support","Za")} ${pc(s.sup)}</span><span><i class="dot" style="background:var(--und)"></i>${L("Undecided","Niezdecydowani")} ${pc(und)}</span><span><i class="dot" style="background:var(--neg)"></i>${L("Oppose","Przeciw")} ${pc(s.opp)}</span>`;
   const tot=top.reduce((x,y)=>x+y[1],0)||1;
-  $("#concerns").innerHTML=top.slice(0,6).map(([k,v])=>`<li class="click" data-c="${k}"><span>${cap(CONCERN_TXT[k])}</span><span>${Math.round(v/tot*100)}% →</span></li>`).join("")||"<li>No major concerns yet</li>";
-  $("#leaders").innerHTML=agents.slice().sort((a,b)=>b.reach-a.reach).slice(0,6).map(a=>`<li class="click" data-i="${a.id}"><span>${esc(a.name)} · ${a.role}</span><span style="color:${colOf(a.op)}">${a.reach} views</span></li>`).join("");
+  $("#concerns").innerHTML=top.slice(0,6).map(([k,v])=>`<li class="click" data-c="${k}"><span>${cap(ct(k))}</span><span>${Math.round(v/tot*100)}% →</span></li>`).join("")||`<li>${L("No major concerns yet","Na razie brak głównych obaw")}</li>`;
+  $("#leaders").innerHTML=agents.slice().sort((a,b)=>b.reach-a.reach).slice(0,6).map(a=>`<li class="click" data-i="${a.id}"><span>${esc(a.name)} · ${roleL(a.role)}</span><span style="color:${colOf(a.op)}">${a.reach} ${L("views","wyświetleń")}</span></li>`).join("");
   const g={};agents.forEach(a=>{(g[a.group]??=[]).push(a.op)});
-  $("#groups").innerHTML=Object.entries(g).map(([k,v])=>[k,v.reduce((x,y)=>x+y,0)/v.length]).sort((a,b)=>b[1]-a[1]).map(([k,m])=>`<li class="click" data-g="${k}"><span>${k}${hiGroup===k?" ◉":""}</span><span style="color:${colOf(m)}">${sgn(m)}</span></li>`).join("");
-  $("#shifts").innerHTML=agents.slice().sort((a,b)=>Math.abs(b.op-b.op0)-Math.abs(a.op-a.op0)).slice(0,6).map(a=>`<li class="click" data-i="${a.id}"><span>${esc(a.name)} · ${a.role}</span><span>${a.op0.toFixed(2)} → <b style="color:${colOf(a.op)}">${a.op.toFixed(2)}</b></span></li>`).join("");
+  $("#groups").innerHTML=Object.entries(g).map(([k,v])=>[k,v.reduce((x,y)=>x+y,0)/v.length]).sort((a,b)=>b[1]-a[1]).map(([k,m])=>`<li class="click" data-g="${k}"><span>${groupL(k)}${hiGroup===k?" ◉":""}</span><span style="color:${colOf(m)}">${sgn(m)}</span></li>`).join("");
+  $("#shifts").innerHTML=agents.slice().sort((a,b)=>Math.abs(b.op-b.op0)-Math.abs(a.op-a.op0)).slice(0,6).map(a=>`<li class="click" data-i="${a.id}"><span>${esc(a.name)} · ${roleL(a.role)}</span><span>${a.op0.toFixed(2)} → <b style="color:${colOf(a.op)}">${a.op.toFixed(2)}</b></span></li>`).join("");
   drawChart(null);
 }
 const CH={W:400,H:190,P:26};
@@ -613,14 +827,14 @@ function drawChart(hi){
   const line=(f,c,w)=>`<polyline fill="none" stroke="${c}" stroke-width="${w}" points="${history.map((h,i)=>cx_(i)+","+cy_(f(h))).join(" ")}"/>`;
   let s=`<line x1="${CH.P}" x2="${CH.W-CH.P}" y1="${CH.H/2}" y2="${CH.H/2}" stroke="#2a302d"/>
    <text x="2" y="${CH.P+4}" fill="#8d978f" font-size="10">+1</text><text x="2" y="${CH.H-CH.P+4}" fill="#8d978f" font-size="10">−1</text>
-   <text x="${CH.P}" y="${CH.H-4}" fill="#8d978f" font-size="10">round 0</text><text x="${CH.W-CH.P}" y="${CH.H-4}" text-anchor="end" fill="#8d978f" font-size="10">round ${CHL-1}</text>`;
+   <text x="${CH.P}" y="${CH.H-4}" fill="#8d978f" font-size="10">${L("round","runda")} 0</text><text x="${CH.W-CH.P}" y="${CH.H-4}" text-anchor="end" fill="#8d978f" font-size="10">${L("round","runda")} ${CHL-1}</text>`;
   if(base)s+=`<polyline fill="none" stroke="#eef2ee88" stroke-width="2" stroke-dasharray="5 4" points="${base.map((v,i)=>cx_(i)+","+cy_(+v)).join(" ")}"/>`;
   events.forEach(e=>{const x=cx_(e.round);s+=`<line x1="${x}" x2="${x}" y1="${CH.P-8}" y2="${CH.H-CH.P}" stroke="${e.tone>0?"#6be37a":"#ff5a5a"}" stroke-dasharray="3 3"/><text x="${x+3}" y="${CH.P-1}" fill="${e.tone>0?"#6be37a":"#ff5a5a"}" font-size="9">📰</text>`;});
   s+=line(h=>h.sup*2-1,"#6be37a66",1.5)+line(h=>h.opp*2-1,"#ff5a5a66",1.5)+line(h=>h.mean,"#c6ff3d",3);
   if(hi!=null){const h=history[hi],x=cx_(hi);s+=`<line x1="${x}" x2="${x}" y1="${CH.P}" y2="${CH.H-CH.P}" stroke="#eef2ee55"/><circle cx="${x}" cy="${cy_(h.mean)}" r="4" fill="#c6ff3d"/>`;
     const ev=events.filter(e=>e.round===hi).map(e=>" · 📰 "+e.text).join("");
-    $("#chartRead").innerHTML=`round ${hi}: mean ${sgn(h.mean)} · ${Math.round(h.sup*100)}% for · ${Math.round(h.opp*100)}% against${ev}`;}
-  else $("#chartRead").innerHTML=`<span style="color:#c6ff3d">━ mean</span> <span style="color:#6be37a">━ % for</span> <span style="color:#ff5a5a">━ % against</span>${base?` <span style="color:#eef2eebb">┅ baseline mean</span>`:""}`;
+    $("#chartRead").innerHTML=`${L("round","runda")} ${hi}: ${L("mean","średnia")} ${sgn(h.mean)} · ${Math.round(h.sup*100)}% ${L("for","za")} · ${Math.round(h.opp*100)}% ${L("against","przeciw")}${ev}`;}
+  else $("#chartRead").innerHTML=`<span style="color:#c6ff3d">━ ${L("mean","średnia")}</span> <span style="color:#6be37a">━ % ${L("for","za")}</span> <span style="color:#ff5a5a">━ % ${L("against","przeciw")}</span>${base?` <span style="color:#eef2eebb">┅ ${L("baseline mean","średnia bazy")}</span>`:""}`;
   $("#chart").innerHTML=s;
 }
 $("#chart").addEventListener("pointermove",e=>{const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*CH.W;
@@ -647,7 +861,7 @@ function frame(){
   const r=cv.getBoundingClientRect(),dpr=devicePixelRatio||1;
   if(r.width&&cv.width!==Math.round(r.width*dpr)){cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);}
   const {W,H,S,cx,cy}=geo();
-  for(const a of agents){a.vx-=a.x*.002;a.vy-=a.y*.002;}
+  for(const a of agents){a.vx-=a.x*.006;a.vy-=a.y*.006;const ex=Math.abs(a.x)-.42,ey=Math.abs(a.y)-.42;if(ex>0)a.vx-=Math.sign(a.x)*ex*.08;if(ey>0)a.vy-=Math.sign(a.y)*ey*.08;}
   for(let i=0;i<agents.length;i++)for(let j=i+1;j<agents.length;j++){const a=agents[i],b=agents[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy+1e-4,f=Math.min(.00004/d2,.01);
     a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f;}
   for(const [i,j] of edges){const a=agents[i],b=agents[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1e-3,f=(d-.18)*.004;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f;}
@@ -675,7 +889,7 @@ cv.addEventListener("pointerdown",e=>{const a=nodeAt(e);downAt=[e.clientX,e.clie
 cv.addEventListener("pointermove",e=>{
   if(drag){const [x,y]=toWorld(e);drag.x=clamp(x,-.5,.5);drag.y=clamp(y,-.5,.5);drag.vx=drag.vy=0;$("#tip").style.display="none";return;}
   const a=nodeAt(e);hoverA=a;const t=$("#tip");
-  if(a){const r=cv.getBoundingClientRect();t.style.display="block";t.innerHTML=`<b>${esc(a.name)}</b> · ${a.role}<br><span style="color:${colOf(opNow(a))}">${moodOf(opNow(a),a.emo)} ${sgn(opNow(a))}</span> · ${a.followers} followers${viewRound!=null?` · round ${viewRound}`:""}`;
+  if(a){const r=cv.getBoundingClientRect();t.style.display="block";t.innerHTML=`<b>${esc(a.name)}</b> · ${roleL(a.role)}<br><span style="color:${colOf(opNow(a))}">${moodL(moodOf(opNow(a),a.emo))} ${sgn(opNow(a))}</span> · ${a.followers} ${L("followers","obserwujących")}${viewRound!=null?` · ${L("round","runda")} ${viewRound}`:""}`;
     const x=e.clientX-r.left+14;t.style.left=Math.min(x,r.width-t.offsetWidth-4)+"px";t.style.top=(e.clientY-r.top+12)+"px";}
   else t.style.display="none";});
 cv.addEventListener("pointerleave",()=>{hoverA=null;$("#tip").style.display="none";});
@@ -686,13 +900,14 @@ cv.addEventListener("pointerup",e=>{const moved=downAt&&Math.hypot(e.clientX-dow
 
 /* ---------- interview ---------- */
 let chatMode="one";
-function selectAgent(a){selected=a;a.chat={used:new Set(),turns:0,last:null};chatMode="one";setMode("one");$("#chatWho").textContent=`${a.name} · ${a.role}`;
+function selectAgent(a){selected=a;a.chat={used:new Set(),turns:0,last:null};chatMode="one";setMode("one");$("#chatWho").textContent=`${a.name} · ${roleL(a.role)}`;
   $("#msgs").innerHTML="";say(greet(a),a);renderPick();}
 function setMode(m){chatMode=m;$("#m1").classList.toggle("on",m==="one");$("#m2").classList.toggle("on",m==="crowd");
-  if(m==="crowd"){$("#chatWho").textContent="The whole crowd";$("#msgs").innerHTML=`<div class="empty">Ask a question — the most supportive, the most opposed and two random people answer.</div>`;}
-  else if(!selected){$("#chatWho").textContent="Interview";$("#msgs").innerHTML='<div class="empty">Pick someone on the left (or click a node in the graph).</div>';}
-  $("#sugs").innerHTML=["Why do you feel that way?","What would change your mind?","Who influenced you?","How will it affect you personally?","Is the price fair?"].map(s=>`<button class="chip">${s}</button>`).join("");}
-function greet(a){return`Hi, I'm ${esc(a.name.split(" ")[0])} — ${a.role.toLowerCase()}. ${a.bio} About ${TOPIC}? Right now I'm ${moodOf(a.op,a.emo).toLowerCase()}${a.op>.18?", leaning yes":a.op<-.18?", leaning no":", still on the fence"}.`;}
+  if(m==="crowd"){$("#chatWho").textContent=L("The whole crowd","Cały tłum");$("#msgs").innerHTML=`<div class="empty">${L("Ask a question — the most supportive, the most opposed and two random people answer.","Zadaj pytanie — odpowie najbardziej za, najbardziej przeciw i dwie losowe osoby.")}</div>`;}
+  else if(!selected){$("#chatWho").textContent=L("Interview","Wywiad");$("#msgs").innerHTML=`<div class="empty">${L("Pick someone on the left (or click a node in the graph).","Wybierz kogoś po lewej (albo kliknij węzeł na grafie).")}</div>`;}
+  $("#sugs").innerHTML=(LANG==="pl"?["Dlaczego tak uważasz?","Co by cię przekonało?","Kto na ciebie wpłynął?","Jak to wpłynie na ciebie?","Czy cena jest uczciwa?"]:["Why do you feel that way?","What would change your mind?","Who influenced you?","How will it affect you personally?","Is the price fair?"]).map(s=>`<button class="chip">${s}</button>`).join("");}
+function greet(a){if(LANG==="pl")return`Cześć, jestem ${esc(a.name.split(" ")[0])} — ${roleL(a.role).toLowerCase()}. ${bioL(a)} Pytasz o ten pomysł? Na razie ${a.op>.18?"raczej jestem za":a.op<-.18?"raczej jestem przeciw":"jeszcze się waham"}.`;
+  return`Hi, I'm ${esc(a.name.split(" ")[0])} — ${a.role.toLowerCase()}. ${a.bio} About ${TOPIC}? Right now I'm ${moodOf(a.op,a.emo).toLowerCase()}${a.op>.18?", leaning yes":a.op<-.18?", leaning no":", still on the fence"}.`;}
 /* Rule-based interview engine. Each agent remembers what it already said and never repeats a sentence until
    it has used every variant; concerns rotate per turn; a repeated question is acknowledged; off-topic questions
    get an honest "I don't follow" instead of a canned opinion. English + a few Polish keywords. */
@@ -705,11 +920,51 @@ const INTENTS=[["greet",/^\s*(hi|hello|hey|yo|cze[sś][cć]|hej|siema)\b/],["you
   ["improve",/improve|better|suggest|\bfix\b|should (they|we|it)|what would you do|what.*(check|czek|test|look at)|ulepsz|popraw|sprawd/],
   ["who",/influenc|follow|who (do|did|are)|\bkto\b/],["news",/news|event|leak|heard|wiadomo/],
   ["price",/price|cost|money|\bpay|cheap|expens|fair|\bcen[aey]|koszt|drog|tani/],["likely",/likely|chance|succeed|will it work|percent|odds|szans|uda si/],
-  ["others",/others|everyone|crowd|people|group|\binni\b|ludzie/],["personal",/affect|personal|your life|daily|day to day|wp[łl]yw|dotkn/],
+  ["others",/others|everyone|crowd|people|group|\binni\b|ludzie/],["personal",/affect|personal|your life|daily|day to day|wp[łl]yw|wpłyn|dotkn|ciebie osobi/],
   ["ack",/^\s*(yes|no|ok|okay|agree|true|right|sure|tak|nie|dobra)\b/]];
 function fresh(a,arr){const u=a.chat.used;let c=arr.filter(x=>!u.has(x));if(!c.length){arr.forEach(x=>u.delete(x));c=arr;}
   const s=c[Math.floor(Math.random()*c.length)];u.add(s);return s;}
+/* Polish rule-based answers: same intents and memory as the English engine; phrasing avoids gendered verb forms */
+const OPEN_PL={blunt:["Słuchaj, ","Wprost: ","Prosto: ",""],warm:["Szczerze, ","Rozumiem. ","Dobre pytanie. ",""],sarcastic:["No jasne — ","Ha. ","Oczywiście, ",""],
+  analytical:["Jak to rozłożyć: ","Patrząc na dane: ","Dwie rzeczy. ",""],cautious:["Cóż… ","Hmm. ","Ostrożnie mówiąc: ",""],optimistic:["Dobra, ","Fajnie, że pytasz! ","Z jasnej strony: ",""],
+  contrarian:["Niepopularne zdanie, ale ","Wszyscy mówią odwrotnie, ale ","Haczyk jest taki: ",""],loyal:["Mówiąc za swoich: ","Tam, skąd jestem, ","Z mojej perspektywy: ",""]};
+function answerPL(a,raw){
+  a.chat??={used:new Set(),turns:0,last:null};const ch=a.chat;ch.turns++;
+  const q=raw.toLowerCase(),cs=a.concerns.map(ct),c=cs[(ch.turns-1)%cs.length],c2=cs[ch.turns%cs.length];
+  const pos=a.op>.18,neg=a.op<-.18,role=roleL(a.role).toLowerCase(),first=esc(a.name.split(" ")[0]),s=history.at(-1),ben=benefitL(a);
+  const sup=Math.round(s.sup*100),opp=Math.round(s.opp*100),moved=a.op-a.op0,ev=events.at(-1),pct=Math.round(clamp(50+a.op*40,5,95));
+  const mates=agents.filter(b=>b.group===a.group),gm=mates.reduce((t,b)=>t+b.op,0)/mates.length;
+  const fs=a.following.map(i=>agents[i]).sort((x,y)=>y.inf-x.inf).slice(0,2),names=fs.map(f=>`${esc(f.name)} (${roleL(f.role).toLowerCase()})`).join(" i ");
+  const rival=agents.slice().sort((x,y)=>pos?x.op-y.op:y.op-x.op)[0];
+  const shift=Math.abs(moved)>.15?fresh(a,[`Ich posty mnie ruszyły: na starcie ${sgn(a.op0)}, teraz ${sgn(a.op)}.`,`Moje zdanie przesunęło się z ${sgn(a.op0)} na ${sgn(a.op)} od początku debaty.`]):fresh(a,["Ale zdanie mam głównie własne.","Moje zdanie mało się zmieniło."]);
+  const onTopic=KW.some(k=>q.includes(k.toLowerCase()))||/(^|[\s,.?!])(to|ten|ta|tego|tym|plan\S*|pomys\S*)(?=$|[\s,.?!])/.test(q);
+  const intent=(INTENTS.find(([,r])=>r.test(q))||[])[0]||(onTopic?"opinion":"offtopic");
+  const R={
+    greet:[`cześć! Pytaj o ten pomysł.`,`hej. Chcesz znać moje zdanie? Śmiało.`,`znowu cześć. Dalej myślę o jednym: ${c}.`],
+    you:[`jestem ${first}, ${role}. ${bioL(a)} Obserwuję ${a.following.length} osób, mnie obserwuje ${a.followers}.`,`${roleL(a.role)}, grupa: ${groupL(a.group).toLowerCase()}, ${a.traits.map(traitL).join(", ")}. W tej sprawie: ${sgn(a.op)}.`],
+    why:pos?[`to mogłoby ${ben} — to dla mnie ważniejsze niż „${c}”.`,`za dużo było półśrodków. Ten pomysł może naprawdę ${ben}.`,`jako ${role} cenię, że to dotyka prawdziwego problemu. „${cap(c)}” to ryzyko, ale do opanowania.`]
+       :neg?[`chodzi o jedno: ${c}. Nikt nie wyjaśnił, jak ten pomysł to rozwiąże, a płacą najpierw ludzie tacy jak ja.`,`to wygląda na pomysł ludzi, którzy nigdy nie musieli martwić się o „${c}”.`,`między „${c}” a „${c2}” nie widzę, dla kogo to właściwie jest.`]
+       :[`widzę plusy, ale martwi mnie „${c}”. Czekam na konkrety.`,`połowa mnie jest za, a połowa wciąż myśli o tym: ${c}.`,`mam rozterkę — to może ${ben}, albo wyłożyć się na „${c}”.`],
+    change:pos?[`gdyby „${c}” okazało się źle załatwione, moje poparcie szybko by zniknęło.`,`zły pierwszy miesiąc. Jeśli pierwsi użytkownicy sparzą się na „${c}”, odpadam.`,`twarde dane w sprawie „${c}” — choćby od kogoś takiego jak ${esc(rival.name)} (${roleL(rival.role).toLowerCase()}) — mogłyby mnie ruszyć.`]
+       :[`jasny plan na „${c}” — prawdziwe liczby, nie hasła — i okres próbny.`,`dajcie ludziom takim jak ja przetestować to za darmo. Jeśli „${c}” okaże się w porządku, zmienię zdanie.`,`postawcie na czele kogoś, kto naprawdę rozumie temat: ${c2}. Wtedy pogadamy.`,`jeśli ${esc(rival.name)} odpowie na moje pytanie o „${c}”, może się ruszę.`],
+    improve:[`załatwcie „${c}” na starcie — opublikujcie zasady przed wprowadzeniem.`,`zacznijcie od małego pilotażu dla ludzi takich jak ja, potem skalujcie.`,`niech pierwsze miesiące będą tańsze albo darmowe — to ucina połowę skarg o „${c}”.`,`zapytajcie najpierw: ${rolesL(rival.role)}. Wyłapią problemy z „${c2}”, których wy nie widzicie.`,`sprawdźcie najpierw „${c}” i „${c2}”. Reszta to detale.`],
+    who:fs.length?[`najczęściej czytam: ${names}. ${shift}`,`${names} — ich posty mam w kanale codziennie. ${shift}`]:["w tej sprawie nikogo nie obserwuję. Wystarcza mi własne doświadczenie.","nikogo, szczerze. Czytam, ale nie obserwuję."],
+    news:ev?[`co do „${ev.text}” — ${ev.tone>0===a.op>0?"potwierdza to, co myślę":"nie wiem, czy to zmienia podstawy"}.`,`czytam o tym: „${ev.text}”. ${ev.tone>0?"Dobra wiadomość, jeśli prawdziwa.":"Niedobrze."} Ale „${c}” to nie załatwia.`]:["na razie nic wielkiego się nie stało.",`na razie żadnych wiadomości. Wszyscy dalej kłócą się o „${c}”.`],
+    price:a.concerns.some(k=>k==="cost"||k==="income")?["pieniądze to mój czuły punkt. Liczy się każda złotówka.",`dla kogoś takiego jak ja cena decyduje o wszystkim. ${pos?"Jeśli zostanie uczciwa, wchodzę.":"Teraz nie wygląda to uczciwie."}`,`liczby są proste. ${pos?"U mnie się spina — na styk.":"W moim budżecie się nie spina."}`]
+       :[`koszt ma znaczenie, ale to nie moje główne zmartwienie — bardziej „${c}”.`,`cena jest w miarę. Bardziej gryzie mnie „${c}”.`,`zapłacę, jeśli „${c}” zostanie załatwione.`],
+    likely:[`daję temu może ${pct}% szans, że zadziała jak obiecano.`,`teraz popiera to około ${sup}% ludzi, których widzę. Stawiam na ${s.sup>s.opp?"to, że przejdzie":"kłopoty"}.`,`${pct}% — i wszystko zależy od jednego: ${c}.`],
+    others:[`większość ludzi z mojej grupy (${groupL(a.group).toLowerCase()}) jest koło ${sgn(gm)} — ${gm>.1?"raczej na tak":gm<-.1?"raczej sceptycznie":"bez zdania"}.`,`tłum jest podzielony: ${sup}% za, ${opp}% przeciw. Ja jestem ${pos?"po stronie tak":neg?"po stronie nie":"pośrodku"}.`,`mój krąg jest głośniejszy, niż wynika z liczb. ${opp>sup?`Dużo złości o „${c}”.`:"Więcej entuzjazmu, niż można było się spodziewać."}`],
+    personal:[`jako ${role} na co dzień chodzi mi o jedno: ${c}. ${pos?`W najlepszym razie to mogłoby ${ben}.`:"W najgorszym — dodatkowy stres, którego nie potrzebuję."}`,`${bioL(a)} Więc dla mnie „${c}” to nie teoria.`,`najpierw uderzy w „${c2}”, potem w „${c}”.`],
+    ack:[`w porządku.${pos?" Cieszę się, że się zgadzamy.":` A jednak „${c}” mnie gryzie.`}`,"mhm. Coś jeszcze?","okej. Możesz zapytać, co by mnie przekonało."],
+    opinion:[`w tej sprawie jestem na ${sgn(a.op)} w skali od −1 do +1. Ciągle wracam do jednego: ${c}.`,`moje zdanie: ${pos?`tak, ale z okiem na „${c}”`:neg?`nie, głównie przez „${c}”`:`bez zdania — otwarta sprawa to „${c}”`}.`,`przesunięcie z ${sgn(a.op0)} na ${sgn(a.op)}. To „${c2}” sprawia, że ${pos?"zachowuję ostrożność":neg?"jestem przeciw":"wciąż się waham"}.`],
+    offtopic:[`nie wiem, co masz na myśli przez „${esc(raw.slice(0,60))}”. Znam się tylko na tym pomyśle — zapytaj, dlaczego tak uważam albo co warto poprawić.`,"to nie moja działka. Jestem tu, żeby rozmawiać o tym pomyśle.","hmm, nie łapię. Zapytaj o pomysł: koszt, kto na mnie wpływa, co by mnie przekonało…"]};
+  const again=ch.last===intent&&!["offtopic","ack","greet"].includes(intent);ch.last=intent;
+  const pre=again?fresh(a,["Jak już było powiedziane — ","Ta sama odpowiedź, innymi słowami: ","To pytanie już padło, ale proszę: ","Dalej to samo: "]):"";
+  const op=["greet","offtopic","ack"].includes(intent)||again?"":fresh(a,OPEN_PL[a.traits[0]]||[""]);
+  const lead=pre+op,body=fresh(a,R[intent]);
+  return lead+(!lead||/[.!?…]\s$/.test(lead)?cap(body):body);}
 function answer(a,raw){
+  if(LANG==="pl")return answerPL(a,raw);
   a.chat??={used:new Set(),turns:0,last:null};const ch=a.chat;ch.turns++;
   const q=raw.toLowerCase(),cs=a.concerns.map(k=>CONCERN_TXT[k]),c=cs[(ch.turns-1)%cs.length],c2=cs[ch.turns%cs.length];
   const pos=a.op>.18,neg=a.op<-.18,role=a.role.toLowerCase(),first=esc(a.name.split(" ")[0]),s=history.at(-1);
@@ -745,12 +1000,39 @@ function answer(a,raw){
   const lead=pre+op,body=fresh(a,R[intent]);
   return lead+(!lead||/[.!?…]\s$/.test(lead)?cap(body):body);}
 function say(t,a){const m=$("#msgs");m.querySelector(".empty")?.remove();
-  m.insertAdjacentHTML("beforeend",a?`<div class="msg ai"><b>${esc(a.name)} · ${a.role}</b>${t}</div>`:`<div class="msg me">${esc(t)}</div>`);m.scrollTop=m.scrollHeight;}
+  m.insertAdjacentHTML("beforeend",a?`<div class="msg ai"><b>${esc(a.name)} · ${roleL(a.role)}</b>${t}</div>`:`<div class="msg me">${esc(t)}</div>`);m.scrollTop=m.scrollHeight;return m.lastElementChild;}
 function sendAsk(text){text=text.trim();if(!text)return;
-  if(chatMode==="one"&&!selected)return toast("Pick someone first — or switch to “Ask the crowd”");
+  if(chatMode==="one"&&!selected)return toast(L("Pick someone first — or switch to “Ask the crowd”","Najpierw wybierz osobę — albo przełącz na „Zapytaj tłum”"));
   say(text);$("#ask").value="";
-  const who=chatMode==="one"?[selected]:(()=>{const s=agents.slice().sort((a,b)=>b.op-a.op),rest=s.slice(1,-1);seed^=hash(text);return[s[0],s.at(-1),pick(rest),pick(rest)].filter((v,i,arr)=>v&&arr.indexOf(v)===i);})();
-  who.forEach((a,i)=>setTimeout(()=>say(answer(a,text),a),300+i*350));}
+  const who=chatMode==="one"?[selected]:(()=>{const s=agents.slice().sort((a,b)=>b.op-a.op),rest=s.slice(1,-1),h=hash(text+round);return[s[0],s.at(-1),rest[h%rest.length],rest[(h>>>8)%rest.length]].filter((v,i,arr)=>v&&arr.indexOf(v)===i);})();
+  who.forEach((a,i)=>setTimeout(async()=>{
+    if(!AI.on){say(answer(a,text),a);return;}
+    const el=say(`<span class="hint">${L("typing…","pisze…")}</span>`,a);a.chat??={used:new Set(),turns:0,last:null};a.chat.ai??=[];
+    const t=await aiCall({kind:"interview",question:text,history:a.chat.ai,persona:personaPayload(a)});
+    const body=t?esc(t)+'<span class="ai-badge">AI</span>':answer(a,text)+`<span class="hint"> · ${L("rules (AI unavailable)","reguły (AI niedostępne)")}</span>`;
+    if(t)a.chat.ai.push({q:text,a:t});
+    el.innerHTML=`<b>${esc(a.name)} · ${roleL(a.role)}</b>${body}`;$("#msgs").scrollTop=$("#msgs").scrollHeight;},300+i*350));}
+
+/* ---------- optional AI voices (api/agent.js on Vercel; off when no key is set there) ---------- */
+const AI={enabled:false,on:false,budget:0};
+const personaPayload=a=>({name:a.name,role:a.role,group:a.group,bio:a.bio,traits:a.traits,concerns:a.concerns.map(k=>CONCERN_TXT[k]),stance:a.op,start:a.op0,followers:a.followers,
+  follows:a.following.map(i=>agents[i]).sort((x,y)=>y.inf-x.inf).slice(0,2).map(f=>`${f.name} (${f.role.toLowerCase()})`)});
+async function aiCall(body){
+  const s=history.at(-1),ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),25000);
+  try{const r=await fetch("api/agent",{method:"POST",headers:{"content-type":"application/json"},signal:ctl.signal,
+      body:JSON.stringify({...body,idea:IDEA,lang:LANG,crowd:{sup:s.sup,opp:s.opp,events:events.slice(-3).map(e=>plain(e.text))}})});
+    if(r.status===429){toast(L("AI limit reached — using rules for a while","Limit AI — przez chwilę działają reguły"));return null;}
+    const j=r.ok?await r.json():null;return j&&typeof j.text==="string"&&j.text.trim()?j.text.trim():null;}
+  catch{return null;}finally{clearTimeout(to);}}
+function aiRewritePost(fresh){
+  if(!AI.on||AI.budget<=0||!fresh.length)return;
+  const top=new Set(agents.slice().sort((a,b)=>b.inf-a.inf).slice(0,6).map(a=>a.id)),p=fresh.find(p=>!p.reply&&top.has(p.by));
+  if(!p)return;AI.budget--;const runPosts=posts;
+  aiCall({kind:"post",focus:CONCERN_TXT[p.concern],persona:personaPayload(agents[p.by]),recent:runPosts.slice(-4).map(x=>plain(x.text))}).then(t=>{
+    if(!t||posts!==runPosts)return;p.text=esc(t);p.ai=true;if(lastTab==="live")renderFeed();});}
+function renderAIBtn(){$("#aiBtn").classList.toggle("hide",!AI.enabled);$("#aiBtn").textContent=L("AI voices: ","Głosy AI: ")+(AI.on?L("on","wł."):L("off","wył."));}
+$("#aiBtn").onclick=()=>{AI.on=!AI.on;LS.set("swarmcast.ai",AI.on);renderAIBtn();toast(AI.on?L("Opinion leaders and interviews now written by Claude","Liderzy opinii i wywiady pisane teraz przez Claude"):L("Back to rule-based text","Wracamy do tekstów z reguł"));};
+fetch("api/agent",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.enabled){AI.enabled=true;AI.on=LS.get("swarmcast.ai",true)!==false;renderAIBtn();}}).catch(()=>{});
 
 /* ---------- export / share ---------- */
 function download(name,text,type){const b=new Blob([text],{type}),u=URL.createObjectURL(b),l=document.createElement("a");l.href=u;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);}
@@ -762,46 +1044,105 @@ function reportMd(){renderReport();const s=history.at(-1);
   const mcMd=m?`\n\n## How sure is this?\n- ${m.N} alternate crowds, ${m.rounds} rounds: support ${pc(m.p10)}–${pc(m.p90)} (10th–90th percentile), median ${pc(m.p50)}\n- Support beat opposition in ${m.wins} of ${m.N} crowds`:"";
   const cmpMd=baseline&&baseline.id!==runId()?`\n\n## Versus baseline\n- Baseline: ${baseline.idea} — ${pc(baseline.sup)} for, ${pc(baseline.opp)} against\n- This run: ${IDEA} — ${pc(s.sup)} for, ${pc(s.opp)} against`:"";
   return`# Swarmcast forecast\n\n**Idea:** ${IDEA}\n\n${plain($("#verdict").innerHTML)}\n\n| Support | Undecided | Oppose |\n|---|---|---|\n| ${Math.round(s.sup*100)}% | ${Math.round((1-s.sup-s.opp)*100)}% | ${Math.round(s.opp*100)}% |\n\n${readMd}${mcMd}${cmpMd}\n\n## Top concerns\n${li("#concerns")}\n\n## Opinion leaders\n${li("#leaders")}\n\n## By group\n${li("#groups")}\n\n## Biggest shifts\n${li("#shifts")}\n\n## Events you injected\n${events.map(e=>`- round ${e.round}: ${plain(e.text)} (${e.tone>0?"good":"bad"} news, ${e.group})`).join("\n")||"- none"}\n\n_${agents.length} simulated agents, ${round} rounds, ${posts.length} posts. Simulated personas, not real people._\n`;}
-function shareLink(){const p=new URLSearchParams({idea:IDEA,a:agents.length,r:maxRounds});if(curSalt)p.set("s",curSalt);return location.href.split("#")[0]+"#"+p.toString();}
+function shareLink(){const p=new URLSearchParams({idea:IDEA,a:agents.length,r:maxRounds});if(curSalt)p.set("s",curSalt);
+  if(MIX.id!=="balanced")p.set("m",MIX.id);if(MIX.custom)p.set("c",[MIX.custom.name,MIX.custom.stance.toFixed(2),MIX.custom.concern,MIX.custom.share].join("~"));return location.href.split("#")[0]+"#"+p.toString();}
 
 /* ---------- wiring ---------- */
 function showTab(t){lastTab=t;$$(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$$("[data-p]").forEach(p=>p.classList.toggle("hide",p.dataset.p!==t));
   if(t==="chat"){renderPick();if(chatMode==="one"&&!selected)setMode("one");}refresh();}
 $("#tabs").onclick=e=>{if(e.target.dataset.t)showTab(e.target.dataset.t)};
-$("#examples").innerHTML=EXAMPLES.map(x=>`<button class="chip">${x}</button>`).join("");
+const renderExamples=()=>$("#examples").innerHTML=(LANG==="pl"?EXAMPLES_PL:EXAMPLES).map(x=>`<button class="chip">${x}</button>`).join("");renderExamples();
 $("#examples").onclick=e=>{if(e.target.classList.contains("chip")){$("#idea").value=e.target.textContent;$("#idea").focus();}};
 [["nAgents","oAgents"],["nRounds","oRounds"],["evStr","oStr"]].forEach(([i,o])=>$("#"+i).oninput=()=>$("#"+o).textContent=$("#"+i).value);
-$("#evGroup").innerHTML=["All",...GROUPS].map(g=>`<option>${g}</option>`).join("");
-$("#pg").innerHTML=["All",...GROUPS].map(g=>`<option>${g}</option>`).join("");
+const groupOpts=()=>["All",...GROUPS].map(g=>`<option value="${g}">${groupL(g)}</option>`).join("");
+$("#evGroup").innerHTML=groupOpts();$("#pg").innerHTML=groupOpts();
+const MIX_PL={balanced:"Zrównoważony",city:"Duże miasto",rural:"Wieś",young:"Studenci i młodzi",older:"Starsze społeczeństwo",business:"Dzielnica biznesowa"};
+function fillSelects(){const mv=$("#mix").value||"balanced",cv=$("#crConcern").value||"cost";
+  $("#mix").innerHTML=Object.entries(MIXES).map(([k,m])=>`<option value="${k}">${L(m.label,MIX_PL[k])}</option>`).join("");$("#mix").value=mv;
+  $("#crConcern").innerHTML=Object.keys(CONCERN_TXT).sort((a,b)=>ct(a).localeCompare(ct(b))).map(k=>`<option value="${k}">${ct(k)}</option>`).join("");$("#crConcern").value=cv;
+  const eg=$("#evGroup").value,pg=$("#pg").value;$("#evGroup").innerHTML=groupOpts();$("#pg").innerHTML=groupOpts();if(eg)$("#evGroup").value=eg;if(pg)$("#pg").value=pg;}
+fillSelects();
+$("#crToggle").onclick=()=>{$("#customBox").classList.toggle("hide");if(!$("#customBox").classList.contains("hide"))$("#crName").focus();};
+$("#crClear").onclick=()=>{$("#crName").value="";$("#customBox").classList.add("hide");};
+$("#crStance").oninput=e=>$("#oStance").textContent=sgn(e.target.value/100);
+$("#crShare").oninput=e=>$("#oShare").textContent=e.target.value+"%";
+function readMix(){const id=MIXES[$("#mix").value]?"#mix":null,name=cleanName($("#crName").value);
+  return{id:id?$("#mix").value:"balanced",custom:name?{name,stance:clamp(+$("#crStance").value/100,-1,1),concern:CONCERN_TXT[$("#crConcern").value]?$("#crConcern").value:"cost",share:clamp(+$("#crShare").value,5,50)}:null};}
+function setMixUI(m){$("#mix").value=m.id;if(m.custom){$("#crName").value=m.custom.name;$("#crStance").value=Math.round(m.custom.stance*100);$("#oStance").textContent=sgn(m.custom.stance);
+  $("#crConcern").value=m.custom.concern;$("#crShare").value=m.custom.share;$("#oShare").textContent=m.custom.share+"%";$("#customBox").classList.remove("hide");}else $("#crName").value="";}
+function parseMix(id,c){const m={id:MIXES[id]?id:"balanced",custom:null};
+  if(c){const [nm,st,co,sh]=String(c).split("~"),name=cleanName(nm);if(name)m.custom={name,stance:clamp(+st||0,-1,1),concern:CONCERN_TXT[co]?co:"cost",share:clamp(Math.round(+sh)||15,5,50)};}
+  return m;}
 
-function start(idea,n,r,salt=0){
-  clearInterval(replayT);replayT=null;viewRound=null;mc=null;curSalt=salt;
-  maxRounds=r;build(idea,n,salt);selected=null;renderRead();hiGroup=null;Object.assign(filt,{mood:null,q:"",concern:null,author:null});$("#fq").value="";
+function start(idea,n,r,salt=0,mix=readMix()){
+  clearInterval(replayT);replayT=null;viewRound=null;mc=null;curSalt=salt;MIX=mix;actions=[];AI.budget=24;
+  maxRounds=r;build(idea,n,salt,mix);selected=null;renderRead();$("#evGroup").innerHTML=groupOpts();$("#pg").innerHTML=groupOpts();hiGroup=null;Object.assign(filt,{mood:null,q:"",concern:null,author:null});$("#fq").value="";
   $("#landing").style.display="none";$("#app").style.display="block";$("#qText").textContent="“"+idea+"”";
-  $("#pause").disabled=false;$("#pause").textContent="Pause";paused=false;speed=+$("#speed").value;
+  $("#pause").disabled=false;paused=false;speed=+$("#speed").value;
   chatMode="one";setMode("one");renderGChips();showTab("live");
-  cancelAnimationFrame(raf);frame();tick();
+  cancelAnimationFrame(raf);frame();if(!openingRun)tick();
   try{window.history.replaceState(null,"",shareLink());}catch{}
 }
 $("#run").onclick=()=>{const idea=$("#idea").value.trim()||EXAMPLES[0];$("#idea").value=idea;start(idea,+$("#nAgents").value,+$("#nRounds").value);};
 $("#idea").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))$("#run").click();});
-$("#pause").onclick=()=>{if(replayT){clearInterval(replayT);replayT=null;}paused=!paused;$("#pause").textContent=paused?"Resume":"Pause";
+$("#pause").onclick=()=>{if(replayT){clearInterval(replayT);replayT=null;}paused=!paused;updateStatus();
   if(!paused&&viewRound!=null)setView(null);else if(lastTab==="report")renderReport();};
-$("#stepBtn").onclick=()=>{if(finished)extend(1);paused=true;$("#pause").textContent="Resume";step();};
-$("#more").onclick=()=>{extend(10);toast("+10 rounds");};
+$("#stepBtn").onclick=()=>{if(finished)extend(1);paused=true;updateStatus();step();};
+$("#more").onclick=()=>{extend(10);toast(L("+10 rounds","+10 rund"));};
 $("#speed").onchange=e=>{speed=+e.target.value;tick();};
 $("#evBtn").onclick=()=>{$("#eventBox").classList.toggle("open");if($("#eventBox").classList.contains("open"))$("#evText").focus();};
 $("#evGo").onclick=()=>{injectEvent($("#evText").value,+$("#evTone").value,$("#evGroup").value,+$("#evStr").value);$("#evText").value="";};
 $("#evText").addEventListener("keydown",e=>{if(e.key==="Enter")$("#evGo").click();});
-$("#share").onclick=async()=>{const l=shareLink();try{await navigator.clipboard.writeText(l);toast("Link copied");}catch{prompt("Copy this link:",l);}};
+$("#share").onclick=async()=>{const l=shareLink();try{await navigator.clipboard.writeText(l);toast(L("Link copied","Link skopiowany"));}catch{prompt(L("Copy this link:","Skopiuj link:"),l);}};
 $("#expMd").onclick=()=>download("swarmcast-report.md",reportMd(),"text/markdown");
 $("#expJson").onclick=()=>download("swarmcast-data.json",JSON.stringify({idea:IDEA,rounds:round,reading:(({frame,doms,against,forr})=>({frame,topics:doms,hitHardest:against,mostOnBoard:forr}))(readSummary()),alternateCrowds:mc&&mc.key===mcKey()?{n:mc.N,p10:mc.p10,p50:mc.p50,p90:mc.p90,supportWins:mc.wins}:null,history:history.map(({ops,...h})=>h),events:events.map(e=>({...e,text:plain(e.text)})),
   agents:agents.map(a=>({name:a.name,role:a.role,group:a.group,start:+a.op0.toFixed(3),end:+a.op.toFixed(3),influence:+a.inf.toFixed(2),posts:a.posts,reach:a.reach,concerns:a.concerns})),
   posts:posts.map(p=>({round:p.round,author:p.by==null?"news":agents[p.by].name,mood:p.mood,text:plain(p.text),likes:p.likes}))},null,2),"application/json");
-$("#rerun").onclick=()=>{start(IDEA,agents.length,Math.max(5,maxRounds),Math.floor(Math.random()*1e9));toast("New random crowd, same idea");};
+$("#rerun").onclick=()=>{start(IDEA,agents.length,Math.max(5,maxRounds),Math.floor(Math.random()*1e9),MIX);toast(L("New random crowd, same idea","Nowy losowy tłum, ten sam pomysł"));};
+
+/* ---------- save / open a run (recipe + intervention log, replayed deterministically) ---------- */
+$("#saveRun").onclick=()=>download("swarmcast-run.json",JSON.stringify({app:"swarmcast",v:1,idea:IDEA,n:agents.length,salt:curSalt,mix:MIX,maxRounds,round,actions},null,1),"application/json");
+function openRun(d){
+  if(!d||d.app!=="swarmcast"||typeof d.idea!=="string")throw new Error("not a Swarmcast run file");
+  const idea=d.idea.slice(0,280).trim(),n=clamp(Math.round(+d.n)||48,20,90),mr=clamp(Math.round(+d.maxRounds)||20,5,200),upto=clamp(Math.round(+d.round)||0,0,mr);
+  const mix=parseMix(d.mix?.id,d.mix?.custom?[d.mix.custom.name,d.mix.custom.stance,d.mix.custom.concern,d.mix.custom.share].join("~"):null);
+  const acts=(Array.isArray(d.actions)?d.actions:[]).slice(0,500).filter(a=>a&&["event","nudge","boost"].includes(a.t)&&Number.isInteger(a.round)&&a.round>=0&&a.round<=upto);
+  $("#idea").value=idea;setMixUI(mix);openingRun=true;try{start(idea,n,mr,Math.floor(Math.abs(+d.salt||0))%1e9,mix);}finally{openingRun=false;}paused=true;
+  quiet=true;
+  try{for(let r=0;;r++){
+      acts.filter(a=>a.round===r).forEach(a=>{
+        if(a.t==="event")injectEvent(String(a.text||""),+a.tone>0?1:-1,a.group==="All"||GROUPS.includes(a.group)?a.group:"All",clamp(Math.round(+a.str)||3,1,5));
+        else if(a.t==="nudge"&&agents[a.id]){nudge(agents[a.id],clamp(+a.v||0,-1,1));actions.push({t:"nudge",round,id:a.id,v:clamp(+a.v||0,-1,1)});}
+        else if(a.t==="boost")boost(posts.find(p=>p.id===a.post));});
+      if(r>=upto)break;step();}}
+  finally{quiet=false;}
+  if(round>=maxRounds)finish();
+  tick();refresh();toast(L(`Opened: round ${round}, ${acts.length} interventions replayed`,`Otwarto: runda ${round}, odtworzono ingerencji: ${acts.length}`));}
+$("#loadFile").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  if(f.size>2e6)return toast(L("File too large","Plik jest za duży"));
+  try{openRun(JSON.parse(await f.text()));}catch(err){toast(L("Could not open: ","Nie da się otworzyć: ")+String(err.message||err).slice(0,60));}};
+
+/* ---------- result card (PNG) ---------- */
+function resultCard(){const W=1200,H=630,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d"),s=history.at(-1),und=1-s.sup-s.opp;
+  g.fillStyle="#0b0d0c";g.fillRect(0,0,W,H);
+  g.fillStyle="#c6ff3d";g.beginPath();g.roundRect(60,52,44,44,12);g.fill();g.fillStyle="#0b0d0c";g.font="900 26px system-ui";g.textAlign="center";g.fillText("◎",82,83);
+  g.textAlign="left";g.fillStyle="#eef2ee";g.font="700 26px system-ui";g.fillText("Swarmcast",120,83);const tw=g.measureText("Swarmcast").width;g.fillStyle="#8d978f";g.font="20px system-ui";g.fillText(L("· simulated crowd forecast","· prognoza z symulowanego tłumu"),132+tw,83);
+  const wrap=(t,x,y,mw,lh,max)=>{const w=t.split(" ");let l="",n=0;for(const x2 of w){const tt=l?l+" "+x2:x2;if(g.measureText(tt).width>mw&&l){g.fillText(l,x,y+n*lh);n++;l=x2;if(n>=max-1){l=w.slice(w.indexOf(x2)).join(" ");if(g.measureText(l).width>mw){while(g.measureText(l+"…").width>mw)l=l.slice(0,-1);l+="…";}break;}}else l=tt;}g.fillText(l,x,y+n*lh);return n+1;};
+  g.fillStyle="#eef2ee";g.font="700 40px system-ui";const lines=wrap("“"+IDEA+"”",60,170,1080,50,3);
+  const y0=170+lines*50+30;
+  g.font="800 96px system-ui";g.fillStyle="#6be37a";g.fillText(pc(s.sup),60,y0+80);const w1=g.measureText(pc(s.sup)).width;
+  g.font="24px system-ui";g.fillStyle="#8d978f";g.fillText(L("support","za"),70+w1,y0+80);
+  g.font="800 96px system-ui";g.fillStyle="#ff5a5a";g.fillText(pc(s.opp),460,y0+80);const w2=g.measureText(pc(s.opp)).width;
+  g.font="24px system-ui";g.fillStyle="#8d978f";g.fillText(L("oppose","przeciw"),470+w2,y0+80);
+  const by=y0+110;[[s.sup,"#6be37a"],[und,"#7c857e"],[s.opp,"#ff5a5a"]].reduce((x,[v,col])=>{g.fillStyle=col;g.fillRect(x,by,1080*v,18);return x+1080*v;},60);
+  g.font="22px system-ui";g.fillStyle="#cfd6d0";const m=mc&&mc.key===mcKey()?mc:null;
+  g.fillText(L(`${agents.length} simulated people · ${round} rounds${m?` · support ${pc(m.p10)}–${pc(m.p90)} across ${m.N} alternate crowds`:""}`,`${agents.length} symulowanych osób · ${round} rund${m?` · poparcie ${pc(m.p10)}–${pc(m.p90)} w ${m.N} innych tłumach`:""}`),60,by+60);
+  g.fillStyle="#8d978f";g.font="18px system-ui";g.fillText(L("Rule-based simulation, not real people and not a poll · swarmcast.vercel.app","Symulacja na regułach, nie prawdziwi ludzie i nie sondaż · swarmcast.vercel.app"),60,H-40);
+  return c;}
+$("#cardPng").onclick=()=>{if(!agents.length)return;resultCard().toBlob(b=>{const u=URL.createObjectURL(b),l=document.createElement("a");l.href=u;l.download="swarmcast-result.png";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);});};
 const goHome=()=>{clearTimeout(timer);cancelAnimationFrame(raf);clearInterval(replayT);replayT=null;viewRound=null;agents=[];$("#app").style.display="none";$("#landing").style.display="block";renderRecent();window.history.replaceState(null,"",location.href.split("#")[0]);};
 $("#replay").onclick=startReplay;
-$("#scrub").oninput=e=>{if(replayT){clearInterval(replayT);replayT=null;}if(!paused&&!finished){paused=true;$("#pause").textContent="Resume";}setView(+e.target.value);};
+$("#scrub").oninput=e=>{if(replayT){clearInterval(replayT);replayT=null;}if(!paused&&!finished){paused=true;updateStatus();}setView(+e.target.value);};
 $("#recentList").onclick=e=>{const b=e.target.closest("[data-recent]");if(!b)return;const r=LS.get("swarmcast.recent",[])[+b.dataset.recent];if(!r)return;
   const n=clamp(+r.a||48,20,90),k=clamp(+r.r||20,5,200);$("#idea").value=r.idea;$("#nAgents").value=n;$("#oAgents").textContent=n;start(String(r.idea).slice(0,280),n,k);};
 renderRecent();
@@ -819,14 +1160,17 @@ $("#sugs").addEventListener("click",e=>{if(e.target.classList.contains("chip"))s
 
 document.addEventListener("input",e=>{const id=e.target.dataset?.nudge;if(id!=null){const a=agents[+id];nudge(a,e.target.value/100);
   const b=e.target.parentElement.querySelector("b");if(b){b.textContent=sgn(a.op);b.style.color=colOf(a.op);}}});
-document.addEventListener("change",e=>{if(e.target.dataset?.nudge!=null){toast("Opinion changed — watch how it spreads");refresh();}});
+document.addEventListener("change",e=>{if(e.target.dataset?.nudge!=null){actions.push({t:"nudge",round,id:+e.target.dataset.nudge,v:+e.target.value/100});toast(L("Opinion changed — watch how it spreads","Zdanie zmienione — zobacz, jak się rozchodzi"));refresh();}});
 document.addEventListener("click",e=>{
   const t=e.target;
   if(t.dataset?.nudge!=null)return;
   if(t.id==="goLive"){setView(null);return;}
-  if(t.id==="mcRun"){monteCarlo();renderReport();toast("40 alternate crowds simulated");return;}
+  if(t.id==="mcRun"){monteCarlo();renderReport();toast(L("40 alternate crowds simulated","Policzono 40 innych tłumów"));return;}
   if(t.id==="pinBase"){pinBaseline();return;}
-  if(t.id==="clearBase"){baseline=null;LS.set("swarmcast.baseline",null);toast("Baseline cleared");renderReport();return;}
+  if(t.id==="benchRun"){t.disabled=true;t.textContent="Running…";setTimeout(()=>{runBenchmark();renderBench();},30);return;}
+  if(t.id==="advRun"){t.disabled=true;t.textContent="Testing…";setTimeout(()=>{runAdvisor();renderAdvisor();},30);return;}
+  if(t.dataset?.variant!=null&&advice){const v=advice.list[+t.dataset.variant];if(v){pinBaseline();$("#idea").value=v.idea;start(v.idea,agents.length,Math.max(5,maxRounds),0,MIX);toast(L("Baseline pinned — running the variant","Baza przypięta — liczę wariant"));}return;}
+  if(t.id==="clearBase"){baseline=null;LS.set("swarmcast.baseline",null);toast(L("Baseline cleared","Baza usunięta"));renderReport();return;}
   if(t.id==="clearF"){Object.assign(filt,{concern:null,author:null});renderFeed();return;}
   if(t.dataset?.boost){boost(posts.find(p=>p.id===+t.dataset.boost));return;}
   if(t.dataset?.act){const a=selected;if(t.dataset.act==="interview"){selectAgent(a);showTab("chat");}
@@ -834,7 +1178,7 @@ document.addEventListener("click",e=>{
   const w=t.closest(".who");if(w){selected=agents[+w.dataset.a];renderSel();return;}
   const li=t.closest("li.click");if(li){if(li.dataset.c){filt.concern=li.dataset.c;filt.author=null;showTab("live");}
     else if(li.dataset.i){selectAgent(agents[+li.dataset.i]);showTab("chat");}
-    else if(li.dataset.g){hiGroup=hiGroup===li.dataset.g?null:li.dataset.g;renderGChips();renderReport();toast(hiGroup?`${hiGroup} highlighted in the graph`:"Highlight cleared");}return;}
+    else if(li.dataset.g){hiGroup=hiGroup===li.dataset.g?null:li.dataset.g;renderGChips();renderReport();toast(hiGroup?L(`${hiGroup} highlighted in the graph`,`${groupL(hiGroup)} podświetleni na grafie`):L("Highlight cleared","Podświetlenie wyłączone"));}return;}
   const c=t.closest(".pcard");if(c){selectAgent(agents[+c.dataset.id]);showTab("chat");}
 });
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select")||!agents.length)return;
@@ -843,7 +1187,15 @@ document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,sele
 // shared link: #idea=...&a=..&r=..
 const hp=new URLSearchParams(location.hash.slice(1));
 if(hp.get("idea")){const idea=hp.get("idea").slice(0,280);$("#idea").value=idea;
-  const n=clamp(+hp.get("a")||48,20,90),r=clamp(+hp.get("r")||20,5,200);$("#nAgents").value=n;$("#oAgents").textContent=n;start(idea,n,r,Math.floor(Math.abs(+hp.get("s")||0))%1e9);}
+  const n=clamp(+hp.get("a")||48,20,90),r=clamp(+hp.get("r")||20,5,200),mix=parseMix(hp.get("m"),hp.get("c"));setMixUI(mix);
+  $("#nAgents").value=n;$("#oAgents").textContent=n;start(idea,n,r,Math.floor(Math.abs(+hp.get("s")||0))%1e9,mix);}
+renderBench();
+/* language switch: static texts, selects and whatever is on screen re-render; posts already written stay in their language */
+function setLang(l){if(l!=="pl"&&l!=="en")return;LANG=l;try{localStorage.setItem("swarmcast.lang",l);}catch{}
+  applyI18n();fillSelects();renderExamples();renderRecent();renderBench();renderAIBtn();
+  if(agents.length){renderRead();renderGChips();setMode(chatMode);if(chatMode==="one"&&selected)$("#chatWho").textContent=`${selected.name} · ${roleL(selected.role)}`;refresh();}}
+document.querySelector(".lang").addEventListener("click",e=>{const l=e.target.dataset?.lang;if(l)setLang(l);});
+applyI18n();
 })();
 </script>
 </body>

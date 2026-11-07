@@ -1,0 +1,9 @@
+{
+  "name": "swarmcast",
+  "private": true,
+  "type": "module",
+  "description": "Static crowd-simulation app plus one optional serverless function (api/agent.js) for AI-written posts and interviews.",
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0"
+  }
+}

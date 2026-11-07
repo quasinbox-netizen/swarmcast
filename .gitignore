@@ -1,3 +1,5 @@
 .vercel
 VENTURE.md
 .claude/
+
+node_modules
