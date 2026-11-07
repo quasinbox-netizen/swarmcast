@@ -137,6 +137,22 @@ h1 em{font-style:normal;color:var(--acc)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--acc);color:var(--acc-ink);padding:9px 16px;border-radius:10px;font-weight:700;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 .toast.on{opacity:1}
 footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
+.read{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--mute);margin:0 0 10px}
+.read b{color:var(--text);font-weight:600}
+.scrub{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12px;color:var(--mute);flex-wrap:wrap}
+.scrub input{flex:1;accent-color:var(--acc);min-width:100px}
+.scrub b{color:var(--text)}
+#graph.past{outline:1px dashed var(--acc);outline-offset:-1px}
+.lnk{background:none;border:0;color:var(--acc);cursor:pointer;text-decoration:underline;font-size:12px;padding:0 0 0 4px}
+.cmp{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+.cmp th,.cmp td{text-align:left;padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp th{color:var(--mute);font-weight:500;font-family:var(--mono);font-size:11px}
+.cmp td.n{font-family:var(--mono);white-space:nowrap}
+.verdict.sm{font-size:15px;margin-bottom:8px}
+.recent{max-width:780px;margin:22px auto 0;text-align:left}
+.recent h4{margin:0 0 8px;font:500 11px var(--mono);letter-spacing:2px;color:var(--mute);text-transform:uppercase}
+.recent .chips{justify-content:flex-start;margin:0}
+.chip small{font-family:var(--mono);color:var(--acc);margin-left:6px}
 @media (max-width:860px){
   .grid{grid-template-columns:1fr}
   .steps{grid-template-columns:repeat(2,1fr)}
@@ -164,6 +180,7 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
         </div>
       </div>
       <div class="chips" id="examples"></div>
+      <div class="recent hide" id="recent"><h4>Your recent runs</h4><div class="chips" id="recentList"></div></div>
     </div>
     <div class="steps">
       <div class="step"><b>01 IDEA</b>You write the scenario in plain words.</div>
@@ -176,6 +193,7 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
   <section id="app">
     <div class="status">
       <div class="q" id="qText"></div>
+      <div class="read" id="readOut"></div>
       <div class="row">
         <div class="kpis"><div>ROUND <b id="kRound">0</b></div><div>POSTS <b id="kPosts">0</b></div><div>SUPPORT <b id="kSup">0%</b></div><div>MOOD <b id="kMood">0</b></div></div>
         <div class="prog"><i id="progBar"></i></div>
@@ -216,6 +234,7 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
     <div data-p="live" class="grid">
       <div class="card"><h3>Social graph <span class="spacer"></span><button class="btn ghost sm" id="relayout">Re-layout</button></h3>
         <div class="gwrap"><canvas id="graph"></canvas><div class="tip" id="tip"></div></div>
+        <div class="scrub"><button class="btn ghost sm" id="replay" title="Replay the debate from round 0 (R)">▶ Replay</button><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Rewind to round"><span id="scrubLbl"></span></div>
         <div class="legend"><span><i class="dot" style="background:var(--pos)"></i>supports</span><span><i class="dot" style="background:var(--und)"></i>undecided</span><span><i class="dot" style="background:var(--neg)"></i>opposes</span><span>size = influence · drag nodes · click to select</span></div>
         <div class="gchips" id="gchips"></div>
         <div class="selcard" id="selcard"></div>
@@ -240,6 +259,8 @@ footer{color:var(--mute);font-size:12px;text-align:center;padding:20px 0 30px}
         <div class="card"><h3>Forecast</h3><p class="verdict" id="verdict"></p>
           <div class="stack" id="stack"></div><div class="legend" id="stackLeg"></div></div>
         <div class="card"><h3>Opinion over time <span class="spacer"></span><span id="chartRead" style="text-transform:none;letter-spacing:0"></span></h3><svg id="chart" viewBox="0 0 400 190" width="100%" height="190"></svg></div>
+        <div class="card"><h3>How sure is this?</h3><div id="mcOut"></div></div>
+        <div class="card"><h3>Compare variants</h3><div id="cmpOut"></div></div>
         <div class="card"><h3>Top concerns · click to read posts</h3><ul class="list" id="concerns"></ul></div>
         <div class="card"><h3>Opinion leaders · click to interview</h3><ul class="list" id="leaders"></ul></div>
         <div class="card"><h3>By group · click to highlight</h3><ul class="list" id="groups"></ul></div>
@@ -311,6 +332,34 @@ const ROLES=[
 ];
 const GROUPS=[...new Set(ROLES.map(r=>r[1]))];
 const CONCERN_TXT={hype:"the hype",cost:"the cost",privacy:"privacy",reliability:"reliability",regulation:"regulation",competition:"competition",customers:"losing customers",returns:"the returns",risk:"the risk",time:"time",fairness:"fairness",access:"access",complexity:"how complicated it is",transparency:"transparency",accountability:"who is accountable",image:"the image",trend:"whether it lasts",environment:"the environment","side effects":"side effects",evidence:"the evidence",workload:"workload",jobs:"jobs",income:"income",voters:"voter backlash",budget:"the budget",quality:"quality",surveillance:"surveillance"};
+Object.assign(CONCERN_TXT,{commute:"getting around",learning:"the quality of learning",productivity:"productivity",affordability:"affordability"});
+/* Reading the idea: framing (restrictive vs generous) + topic domains. "stake" = how hard a role is hit, it amplifies the
+   framing in either direction; "lean" = a fixed preference of that role on the topic; "hot" = the concern it adds. */
+const RESTRICT=/\bcharg(e|es|ing)\b|\btax|\bfees?\b|\bban(s|ned)?\b|remov|replac|\bcut|price rise|increas|\bfines?\b|proctor|surveil|\btrack|mandator|compulsor|abolish|\bclos(e|es|ing)\b/;
+const GENEROUS=/\bfree\b|unlimited|cheaper|faster|four-day|4-day|subsid|discount|bonus|\bopen|\bmore\b/;
+const DOMAINS=[
+ {label:"transport",re:/\bcars?\b|traffic|\bdriv|parking|congestion|\bbus(es)?\b|\btrains?\b|\bbikes?\b|cycl|\broads?\b|commut|\btoll|fuel|petrol|metro|\btram/,
+  stake:{"Rural resident":1.3,"Delivery driver":1.3,"Working parent":.6,"Small business owner":.6,"Retiree":.3},lean:{"Climate activist":.35,"Policy analyst":.15,"University student":.15},hot:"commute"},
+ {label:"pricing",re:/€|\$|£|price|subscription|per month|\/month|monthly|\bfees?\b|\bcosts?\b|cheap|discount|\bpay\b/,
+  stake:{"Working parent":.5,"Retiree":.5,"University student":.5,"Delivery driver":.5,"Small business owner":.3},hot:"cost"},
+ {label:"education",re:/school|universit|exam|student|teacher|lesson|homework|campus|curricul/,stake:{"University student":1.5,"Teacher":1.2},hot:"learning"},
+ {label:"work",re:/work[- ]?week|4-day|four-day|salar|wage|\bjobs?\b|working hours|remote work|overtime|public servant|employ|pension/,
+  stake:{"Nurse":1.2,"Teacher":1.2,"Delivery driver":1,"Freelance designer":.6},lean:{"Small business owner":-.2,"Investor":-.15},hot:"productivity"},
+ {label:"devices",re:/phone|charger|headphone|device|gadget|laptop|console/,stake:{"Early adopter":1,"Gamer":.8,"Retiree":.6},hot:"quality"},
+ {label:"data & AI",re:/\bai\b|data|algorithm|camera|facial|online|\bapps?\b|digital/,lean:{"Privacy advocate":-.25,"Software engineer":-.05,"Early adopter":.1},hot:"privacy"},
+ {label:"environment",re:/climate|emission|\bgreen\b|carbon|plastic|recycl|solar|electric|pollut|clean air/,lean:{"Climate activist":.3},stake:{"Small business owner":.4},hot:"environment"},
+ {label:"health",re:/health|hospital|doctor|vaccin|\bcare\b|nurse|medic|clinic/,stake:{"Nurse":1.2,"Retiree":1},hot:"access"},
+ {label:"housing",re:/\brent\b|housing|apartment|mortgage|landlord|\bhomes?\b/,stake:{"University student":1.2,"Working parent":1},lean:{"Investor":-.15},hot:"affordability"}
+];
+function readIdea(low){
+  const neg=RESTRICT.test(low),gen=GENEROUS.test(low),frame=(neg?-1:0)+(gen?1:0),fx={},hot={},doms=[];
+  DOMAINS.forEach(d=>{if(!d.re.test(low))return;doms.push(d.label);
+    Object.entries(d.stake||{}).forEach(([r,k])=>{if(frame){fx[r]=(fx[r]||0)+frame*.12*k;hot[r]??=d.hot;}});
+    Object.entries(d.lean||{}).forEach(([r,v])=>{fx[r]=(fx[r]||0)+v;hot[r]??=d.hot;});});
+  Object.keys(fx).forEach(r=>fx[r]=clamp(fx[r],-.35,.35));
+  return{frame,mixed:neg&&gen,shift:frame*.18,fx,hot,doms};
+}
+let READ=readIdea("");
 const cap=s=>s[0].toUpperCase()+s.slice(1);
 const STOP=new Set("the a an and or but of to in on for with from by at is are was be will our their its this that every each next year starting into than then over under your my we you they it as new launches introduce introduces replace replaces removes".split(" "));
 const MOODS={Excited:{c:"#1e9d3a",bg:"#d9f7d4"},Supportive:{c:"#2f7d3a",bg:"#e5f3e1"},Curious:{c:"#2b63b8",bg:"#dfeafb"},Skeptical:{c:"#9a6400",bg:"#fbecd2"},Angry:{c:"#b8261f",bg:"#fbdcda"}};
@@ -324,8 +373,8 @@ const T={
  pos:["Honestly {topic} is overdue. As a {role_l}, this could {benefit}.","Hot take: {topic} is the best idea I've heard this year. People worrying about {concern} will come around.","Tried to find a downside to {topic}. Couldn't really. Count me in.","If {topic} happens, it will {benefit}. That's a win.","“{kw}” is exactly what we needed. Bring it on."],
  neu:["Interesting… but what about {concern}? Need details before I believe in {topic}.","Not sold either way on {topic}. Show me how {concern} is handled.","Could go both ways. Depends entirely on {concern}.","Asking honestly: has anyone thought through {concern} here?"],
  neg:["Who asked for {topic}? {Concern} alone makes this a mess.","As a {role_l}, {topic} hits me first. Nobody talked to people like us about {concern}.","Another top-down idea. {Concern} will be ignored until it's too late.","No. Just no. {topic} ignores {concern} completely.","It is frustrating to watch “{kw}” get pushed with zero thought about {concern}."],
- rep_ag:["@{to} exactly this. {Concern} is the whole point.","@{to} agree — and nobody is saying it loudly enough.","@{to} 100%. Shared with my group."],
- rep_dis:["@{to} I see it differently — {concern} is solvable.","@{to} that's a bit dramatic, no?","@{to} respectfully, people like me experience it the opposite way."],
+ rep_ag:["{to} exactly this. {Concern} is the whole point.","{to} agree — and nobody is saying it loudly enough.","{to} 100%. Shared with my group."],
+ rep_dis:["{to} I see it differently — {concern} is solvable.","{to} that's a bit dramatic, no?","{to} respectfully, people like me experience it the opposite way."],
  ev_pos:["Did you all see this? “{ev}” — that changes things for me.","“{ev}”. Okay, I'm a bit more convinced now.","If “{ev}” is true, the critics need a new argument."],
  ev_neg:["“{ev}”. This is exactly what I was afraid of.","Wow. “{ev}”. Who signed off on this?","So now “{ev}”… and we're supposed to just accept it?"]
 };
@@ -345,13 +394,13 @@ function build(idea,n,salt=0){
   const words=idea.toLowerCase().replace(/[^\p{L}\p{N}\s€$-]/gu," ").split(/\s+/).filter(w=>w.length>3&&!STOP.has(w));
   KW=[...new Set(words)].slice(0,6).map(esc);
   TOPIC=idea.length<70?`“${esc(idea.replace(/[.!?]+$/,""))}”`:"this plan";
-  const low=idea.toLowerCase();
-  const shift=(/charge|tax|fee|ban|remove|replac|cut|price|increase|fine|proctor|surveil|track/.test(low)?-.18:0)+(/free|unlimited|cheaper|faster|green|four-day|4-day|subsid|open|discount|bonus/.test(low)?.18:0);
+  READ=readIdea(idea.toLowerCase());
   agents=[];
   for(let i=0;i<n;i++){
-    const r=ROLES[i%ROLES.length],name=`${pick(FIRST)} ${pick(LAST)}`,op=clamp(r[2]+shift+gauss()*.45,-1,1);
+    const r=ROLES[i%ROLES.length],name=`${pick(FIRST)} ${pick(LAST)}`,op=clamp(r[2]+READ.shift+(READ.fx[r[0]]||0)+gauss()*.45,-1,1);
+    const concerns=READ.hot[r[0]]?[...new Set([READ.hot[r[0]],...r[5]])].slice(0,3):r[5];
     agents.push({id:i,name,handle:"@"+name.split(" ")[0].toLowerCase()+"_"+(10+Math.floor(rnd()*89)),role:r[0],group:r[1],emo:clamp(r[3]+gauss()*.15,0,1),
-      inf:clamp(r[4]+gauss()*.2,.1,1),concerns:r[5],benefit:r[6],bio:r[7],op,op0:op,stub:.2+rnd()*.6,
+      inf:clamp(r[4]+gauss()*.2,.1,1),concerns,benefit:r[6],bio:r[7],op,op0:op,stub:.2+rnd()*.6,
       traits:[pick(["blunt","warm","sarcastic","analytical","cautious","optimistic","contrarian","loyal"]),pick(["data-driven","story-teller","community-minded","self-reliant","trend-follower"])],
       x:0,y:0,vx:0,vy:0,flash:0,posts:0,reach:0,nudged:false,color:`hsl(${Math.floor(rnd()*360)} 55% 45%)`});
   }
@@ -367,7 +416,7 @@ function build(idea,n,salt=0){
 }
 function layout(){agents.forEach(a=>{const g=GROUPS.indexOf(a.group),ang=g/GROUPS.length*Math.PI*2;a.x=Math.cos(ang)*.32+gauss()*.1;a.y=Math.sin(ang)*.32+gauss()*.1;a.vx=a.vy=0;a.pin=false;});}
 function stats(){const ops=agents.map(a=>a.op),m=ops.reduce((s,v)=>s+v,0)/ops.length;
-  return{mean:m,sup:ops.filter(o=>o>.18).length/ops.length,opp:ops.filter(o=>o<-.18).length/ops.length,sd:Math.sqrt(ops.reduce((s,v)=>s+(v-m)**2,0)/ops.length)};}
+  return{mean:m,sup:ops.filter(o=>o>.18).length/ops.length,opp:ops.filter(o=>o<-.18).length/ops.length,sd:Math.sqrt(ops.reduce((s,v)=>s+(v-m)**2,0)/ops.length),ops};}
 
 function influence(src,p,w=1){
   agents.forEach(b=>{ if(b.following.includes(src.id)){
@@ -396,10 +445,42 @@ function step(){
   fresh.forEach(p=>influence(agents[p.by],p));
   agents.forEach(a=>{a.op=clamp(a.op+gauss()*.02,-1,1);});
   posts.push(...fresh);history.push(stats());
+  if(headless)return;
   if(round>=maxRounds)finish();
   refresh();
 }
-function finish(){finished=true;paused=false;$("#pause").textContent="Done ✓";$("#pause").disabled=true;toast("Simulation finished — forecast ready");}
+function finish(){finished=true;paused=false;$("#pause").textContent="Done ✓";$("#pause").disabled=true;toast("Simulation finished — forecast ready");saveRecent();}
+
+/* ---------- alternate crowds (Monte Carlo) ----------
+   Re-runs the same idea with different random people and connections, replaying the user's events at the same rounds.
+   Swaps the simulation globals out and restores them afterwards, so the visible run is untouched. */
+let headless=false,mc=null,curSalt=0;
+const pc=v=>Math.round(v*100)+"%";
+const mcKey=()=>[IDEA,agents.length,curSalt,round,events.map(e=>[e.round,e.tone,e.group,e.str].join(":")).join(",")].join("|");
+function monteCarlo(N=40){
+  const key=mcKey();if(mc&&mc.key===key)return mc;
+  const S={agents,edges,posts,history,events,round,maxRounds,concernCount,finished,postId,seed,KW,TOPIC,IDEA,READ};
+  const R=round||maxRounds,evs=events.slice(),n=agents.length,res=[],t0=performance.now();
+  headless=true;
+  try{for(let k=0;k<N;k++){build(S.IDEA,n,1000003+k*7919);maxRounds=R;
+      const due=r=>evs.forEach(e=>{if(e.round===r){events.push({...e});applyEvent(e);}});
+      for(;;){due(round);if(round>=R)break;step();}
+      const s=stats();res.push({sup:s.sup,opp:s.opp});}}
+  finally{headless=false;({agents,edges,posts,history,events,round,maxRounds,concernCount,finished,postId,seed,KW,TOPIC,IDEA,READ}=S);}
+  const sups=res.map(r=>r.sup).sort((a,b)=>a-b),q=p=>sups[Math.round(p*(N-1))],bins=Array(10).fill(0);
+  res.forEach(r=>bins[Math.min(9,Math.floor(r.sup*10))]++);
+  return mc={key,N,rounds:R,p10:q(.1),p50:q(.5),p90:q(.9),wins:res.filter(r=>r.sup>r.opp).length,bins,ms:performance.now()-t0,cur:history.at(-1).sup};
+}
+
+/* ---------- saved runs: recent list + baseline for comparison ---------- */
+const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+let baseline=LS.get("swarmcast.baseline",null);
+const runId=()=>IDEA+"|"+agents.length+"|"+curSalt;
+function saveRecent(){const s=history.at(-1),l=LS.get("swarmcast.recent",[]).filter(r=>r&&r.idea!==IDEA);
+  l.unshift({idea:IDEA,a:agents.length,r:maxRounds,sup:s.sup,opp:s.opp});LS.set("swarmcast.recent",l.slice(0,6));}
+function renderRecent(){const l=LS.get("swarmcast.recent",[]).filter(r=>r&&typeof r.idea==="string");
+  $("#recent").classList.toggle("hide",!l.length);
+  $("#recentList").innerHTML=l.map((r,i)=>`<button class="chip" data-recent="${i}" title="${esc(r.idea)}">${esc(r.idea.length>58?r.idea.slice(0,32)+" … "+r.idea.slice(-22):r.idea)}<small>${pc(+r.sup||0)} for</small></button>`).join("");}
 
 /* ---------- loop ---------- */
 function tick(){clearTimeout(timer);if(!paused&&!finished&&agents.length)step();timer=setTimeout(tick,700/speed);}
@@ -409,11 +490,12 @@ function extend(n){maxRounds+=n;finished=false;$("#pause").disabled=false;$("#pa
 function injectEvent(text,tone,group,str){
   text=text.trim();if(!text)return toast("Write the news first");
   const ev={round,text:esc(text),tone,group,str};events.push(ev);
-  let n=0;agents.forEach(a=>{if(group==="All"||a.group===group){a.op=clamp(a.op+tone*.07*str*(1-a.stub*.7)*(.6+rnd()*.8),-1,1);a.flash=1;n++;}});
+  const n=applyEvent(ev);
   posts.push({id:postId++,by:null,news:true,text:ev.text,tone,group,round,likes:0,mood:tone>0?"Supportive":"Skeptical",concern:null});
   history[history.length-1]=stats();
   toast(`Event reached ${n} people`);refresh();
 }
+function applyEvent(ev){let n=0;agents.forEach(a=>{if(ev.group==="All"||a.group===ev.group){a.op=clamp(a.op+ev.tone*.07*ev.str*(1-a.stub*.7)*(.6+rnd()*.8),-1,1);a.flash=1;n++;}});return n;}
 function nudge(a,v){a.op=clamp(v,-1,1);a.nudged=true;a.flash=1;history[history.length-1]=stats();refresh(true);}
 function boost(p){if(p.boosted||p.by==null)return;p.boosted=true;const src=agents[p.by];src.inf=clamp(src.inf+.08,0,1);influence(src,p,2.5);src.flash=1;
   history[history.length-1]=stats();toast(`Boosted ${src.name.split(" ")[0]}'s post`);refresh();}
@@ -429,7 +511,7 @@ function postHTML(p){
 }
 function renderFeed(){
   const q=filt.q.toLowerCase();
-  let list=posts.filter(p=>(!filt.mood||p.mood===filt.mood&&!p.news)&&(!filt.concern||p.concern===filt.concern)&&(filt.author==null||p.by===filt.author)&&(!q||p.text.toLowerCase().includes(q)||(p.by!=null&&agents[p.by].name.toLowerCase().includes(q))));
+  let list=posts.filter(p=>(viewRound==null||p.round<=viewRound)&&(!filt.mood||p.mood===filt.mood&&!p.news)&&(!filt.concern||p.concern===filt.concern)&&(filt.author==null||p.by===filt.author)&&(!q||p.text.toLowerCase().includes(q)||(p.by!=null&&agents[p.by].name.toLowerCase().includes(q))));
   const total=list.length;list=list.slice(-80).reverse();
   const f=$("#feed"),top=f.scrollTop;
   f.innerHTML=list.map(postHTML).join("")||`<div class="empty">${posts.length?"No posts match this filter.":"The crowd is warming up…"}</div>`;
@@ -459,14 +541,59 @@ function renderSel(){const c=$("#selcard");if(!selected){c.classList.remove("ope
   <div class="row" style="margin-top:8px"><button class="btn sm" data-act="interview">Interview</button><button class="btn ghost sm" data-act="posts">Show their posts</button><button class="btn ghost sm" data-act="close">Close</button></div>`;}
 function renderGChips(){$("#gchips").innerHTML=`<span style="font-size:12px;color:var(--mute)">Highlight:</span>`+["All",...GROUPS].map(g=>`<button class="chip${(hiGroup||"All")===g?" on":""}" data-g="${g}">${g}</button>`).join("");}
 
+function readSummary(){const R=READ,ent=Object.entries(R.fx).sort((a,b)=>a[1]-b[1]);
+  return{frame:R.mixed?"mixed (a cost and a benefit)":R.frame<0?"restrictive":R.frame>0?"generous":"neutral",doms:R.doms,
+    against:ent.filter(e=>e[1]<-.08).slice(0,2).map(e=>e[0]+"s"),forr:ent.filter(e=>e[1]>.08).reverse().slice(0,2).map(e=>e[0]+"s")};}
+function renderRead(){const r=readSummary();
+  $("#readOut").innerHTML=`<span>Read from your idea:</span>${(r.doms.length?r.doms:["no specific topic"]).map(d=>`<span class="tag">${d}</span>`).join("")}<span class="tag">${r.frame} framing</span>`+
+    (r.against.length?`<span>hit hardest: <b>${r.against.join(", ")}</b></span>`:"")+(r.forr.length?`<span>most on board: <b>${r.forr.join(", ")}</b></span>`:"")+
+    (r.doms.length||READ.frame||READ.mixed?"":`<span>· everyone starts from their general temperament</span>`);}
+let viewRound=null,replayT=null,replayWasPaused=false;
+const opNow=a=>viewRound!=null?history[viewRound].ops[a.id]:a.op;
+function renderScrub(){const s=$("#scrub");s.max=round;s.value=viewRound??round;const h=history[viewRound??round];
+  $("#graph").classList.toggle("past",viewRound!=null);
+  $("#scrubLbl").innerHTML=viewRound==null?`<b>live</b> · round ${round}`:`round <b>${viewRound}</b> of ${round} · ${pc(h.sup)} for, ${pc(h.opp)} against · <button class="lnk" id="goLive">back to live</button>`;
+  $("#replay").textContent=replayT?"■ Stop":"▶ Replay";}
+function setView(v){viewRound=v==null||v>=round?null:Math.max(0,v);renderScrub();renderFeed();}
+function stopReplay(){if(!replayT)return;clearInterval(replayT);replayT=null;if(!replayWasPaused&&!finished){paused=false;$("#pause").textContent="Pause";}renderScrub();}
+function startReplay(){if(replayT)return stopReplay();if(round<1)return toast("Nothing to replay yet");
+  replayWasPaused=paused;paused=true;if(!finished)$("#pause").textContent="Resume";viewRound=0;
+  replayT=setInterval(()=>{if(viewRound==null||viewRound>=round-1){setView(null);stopReplay();return;}setView(viewRound+1);},clamp(4000/round,70,400));
+  renderScrub();renderFeed();}
+function renderMC(){const el=$("#mcOut");
+  if(!(mc&&mc.key===mcKey())&&(finished||paused))monteCarlo();
+  const fresh=mc&&mc.key===mcKey();
+  const m=mc;
+  if(!m){el.innerHTML=`<p class="hint">One run is one random crowd. Swarmcast can replay your idea with 40 different crowds to show how much the result depends on luck. It runs automatically when the simulation is paused or finished.</p><button class="btn sm" id="mcRun">Run 40 alternate crowds now</button>`;return;}
+  const spread=m.p90-m.p10,conf=spread<.12?"fairly stable":spread<.25?"moderately uncertain":"highly uncertain — it depends a lot on who is in the crowd";
+  const mx=Math.max(...m.bins,1),cb=Math.min(9,Math.floor(m.cur*10));
+  const bars=m.bins.map((b,i)=>`<rect x="${i*30+2}" y="${62-b/mx*52}" width="26" height="${Math.max(1,b/mx*52)}" rx="3" fill="${i===cb?"#c6ff3d":"#6be37a88"}"/><text x="${i*30+15}" y="76" fill="#8d978f" font-size="8" text-anchor="middle">${i*10}%</text>`).join("");
+  el.innerHTML=`<p class="verdict sm">In 8 of 10 alternate crowds support lands between <b>${pc(m.p10)}</b> and <b>${pc(m.p90)}</b> (median ${pc(m.p50)}). Support beats opposition in <b>${m.wins} of ${m.N}</b>. The forecast is ${conf}.</p>
+   <svg viewBox="0 0 300 80" width="100%" height="90" role="img" aria-label="Distribution of support across alternate crowds">${bars}</svg>
+   <div class="hint">Bars: how many of the ${m.N} crowds ended at each support level after ${m.rounds} rounds. Highlighted: the bar your run falls in (${pc(m.cur)}). Same idea and same events — different random people and connections; your nudges and boosts are not replayed.${fresh?"":` <b>As of an earlier round</b> — updates when you pause.`}</div>`;}
+function renderCompare(){const el=$("#cmpOut"),s=history.at(-1);
+  if(!baseline){el.innerHTML=`<p class="hint">Pin this run, then change the idea (a lower price, a pilot first, an exemption for residents…) and run it again. Both forecasts then appear side by side here and on the chart.</p><button class="btn sm" id="pinBase">Pin as baseline</button>`;return;}
+  if(baseline.id===runId()){el.innerHTML=`<p class="hint">This run is your baseline (${pc(baseline.sup)} support, ${pc(baseline.opp)} against). Now click <b>New idea</b>, tweak the text and run a variant — the comparison shows up here.</p><button class="btn ghost sm" id="clearBase">Clear baseline</button>`;return;}
+  const d=(v,goodUp)=>{const p=Math.round(v*100);return`<b style="color:${p===0?"var(--mute)":(p>0)===goodUp?"var(--pos)":"var(--neg)"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} pts</b>`;};
+  el.innerHTML=`<table class="cmp"><tr><th></th><th>Idea</th><th>For</th><th>Against</th></tr>
+   <tr><td class="n" style="color:var(--mute)">baseline</td><td>${esc(baseline.idea)}</td><td class="n">${pc(baseline.sup)}</td><td class="n">${pc(baseline.opp)}</td></tr>
+   <tr><td class="n" style="color:var(--acc)">this run</td><td>${esc(IDEA)}</td><td class="n">${pc(s.sup)}</td><td class="n">${pc(s.opp)}</td></tr></table>
+   <p class="verdict sm">Versus the baseline: support ${d(s.sup-baseline.sup,true)}, opposition ${d(s.opp-baseline.opp,false)}.${baseline.band&&mc&&mc.key===mcKey()?` Alternate-crowd ranges: ${pc(baseline.band[0])}–${pc(baseline.band[1])} vs ${pc(mc.p10)}–${pc(mc.p90)}${mc.p10>baseline.band[1]||mc.p90<baseline.band[0]?" — they don't overlap, so the difference is not just luck.":" — they overlap, so part of the difference may be luck."}`:""}</p>
+   <div class="row"><button class="btn ghost sm" id="pinBase">Make this the baseline</button><button class="btn ghost sm" id="clearBase">Clear baseline</button></div>`;}
+function pinBaseline(){const s=history.at(-1),m=mc&&mc.key===mcKey()?mc:null;
+  baseline={id:runId(),idea:IDEA,sup:s.sup,opp:s.opp,means:history.map(h=>+h.mean.toFixed(3)),band:m?[m.p10,m.p90]:null};
+  LS.set("swarmcast.baseline",baseline);toast("Pinned as baseline");renderReport();}
+
 function renderReport(){
+  renderMC();
   const s=history.at(-1),s0=history[0],und=1-s.sup-s.opp;
   const lean=s.sup>s.opp+.1?"likely to be <b>accepted</b>":s.opp>s.sup+.1?"likely to meet <b>strong resistance</b>":"set to <b>split opinion</b>";
   const pol=s.sd>.55?"highly polarised":s.sd>.38?"divided":"fairly cohesive";
   const trend=s.mean-s0.mean>.05?"warming up over time":s.mean-s0.mean<-.05?"cooling down as the debate went on":"stable through the debate";
   const top=Object.entries(concernCount).sort((a,b)=>b[1]-a[1]);
   const evTxt=events.length?` You intervened with ${events.length} event${events.length>1?"s":""}.`:"";
-  $("#verdict").innerHTML=`${finished?"After":"So far, after"} ${round} rounds and ${posts.length} posts, ${TOPIC} is ${lean}. <b>${Math.round(s.sup*100)}%</b> support it, <b>${Math.round(s.opp*100)}%</b> oppose it. The crowd is ${pol} and ${trend}.${top[0]?` The main fault line is <b>${CONCERN_TXT[top[0][0]]}</b>.`:""}${evTxt}`;
+  $("#verdict").innerHTML=`${finished?"After":"So far, after"} ${round} rounds and ${posts.length} posts, ${TOPIC} is ${lean}. <b>${Math.round(s.sup*100)}%</b> support it, <b>${Math.round(s.opp*100)}%</b> oppose it. The crowd is ${pol} and ${trend}.${top[0]?` The main fault line is <b>${CONCERN_TXT[top[0][0]]}</b>.`:""}${evTxt}${mc&&mc.key===mcKey()?` Across ${mc.N} alternate crowds, support ranges <b>${pc(mc.p10)}–${pc(mc.p90)}</b>.`:""}`;
+  renderCompare();
   $("#stack").innerHTML=`<i style="width:${s.sup*100}%;background:var(--pos)"></i><i style="width:${und*100}%;background:var(--und)"></i><i style="width:${s.opp*100}%;background:var(--neg)"></i>`;
   $("#stackLeg").innerHTML=`<span><i class="dot" style="background:var(--pos)"></i>Support ${Math.round(s.sup*100)}%</span><span><i class="dot" style="background:var(--und)"></i>Undecided ${Math.round(und*100)}%</span><span><i class="dot" style="background:var(--neg)"></i>Oppose ${Math.round(s.opp*100)}%</span>`;
   const tot=top.reduce((x,y)=>x+y[1],0)||1;
@@ -478,28 +605,32 @@ function renderReport(){
   drawChart(null);
 }
 const CH={W:400,H:190,P:26};
-const cx_=i=>CH.P+(history.length>1?i/(history.length-1):0)*(CH.W-CH.P*2), cy_=v=>CH.H/2-v*(CH.H/2-CH.P);
+let CHL=1;
+const cx_=i=>CH.P+(CHL>1?i/(CHL-1):0)*(CH.W-CH.P*2), cy_=v=>CH.H/2-v*(CH.H/2-CH.P);
 function drawChart(hi){
+  const base=baseline&&baseline.id!==runId()&&Array.isArray(baseline.means)?baseline.means:null;
+  CHL=Math.max(history.length,base?base.length:0);
   const line=(f,c,w)=>`<polyline fill="none" stroke="${c}" stroke-width="${w}" points="${history.map((h,i)=>cx_(i)+","+cy_(f(h))).join(" ")}"/>`;
   let s=`<line x1="${CH.P}" x2="${CH.W-CH.P}" y1="${CH.H/2}" y2="${CH.H/2}" stroke="#2a302d"/>
    <text x="2" y="${CH.P+4}" fill="#8d978f" font-size="10">+1</text><text x="2" y="${CH.H-CH.P+4}" fill="#8d978f" font-size="10">−1</text>
-   <text x="${CH.P}" y="${CH.H-4}" fill="#8d978f" font-size="10">round 0</text><text x="${CH.W-CH.P}" y="${CH.H-4}" text-anchor="end" fill="#8d978f" font-size="10">round ${round}</text>`;
+   <text x="${CH.P}" y="${CH.H-4}" fill="#8d978f" font-size="10">round 0</text><text x="${CH.W-CH.P}" y="${CH.H-4}" text-anchor="end" fill="#8d978f" font-size="10">round ${CHL-1}</text>`;
+  if(base)s+=`<polyline fill="none" stroke="#eef2ee88" stroke-width="2" stroke-dasharray="5 4" points="${base.map((v,i)=>cx_(i)+","+cy_(+v)).join(" ")}"/>`;
   events.forEach(e=>{const x=cx_(e.round);s+=`<line x1="${x}" x2="${x}" y1="${CH.P-8}" y2="${CH.H-CH.P}" stroke="${e.tone>0?"#6be37a":"#ff5a5a"}" stroke-dasharray="3 3"/><text x="${x+3}" y="${CH.P-1}" fill="${e.tone>0?"#6be37a":"#ff5a5a"}" font-size="9">📰</text>`;});
   s+=line(h=>h.sup*2-1,"#6be37a66",1.5)+line(h=>h.opp*2-1,"#ff5a5a66",1.5)+line(h=>h.mean,"#c6ff3d",3);
   if(hi!=null){const h=history[hi],x=cx_(hi);s+=`<line x1="${x}" x2="${x}" y1="${CH.P}" y2="${CH.H-CH.P}" stroke="#eef2ee55"/><circle cx="${x}" cy="${cy_(h.mean)}" r="4" fill="#c6ff3d"/>`;
     const ev=events.filter(e=>e.round===hi).map(e=>" · 📰 "+e.text).join("");
     $("#chartRead").innerHTML=`round ${hi}: mean ${sgn(h.mean)} · ${Math.round(h.sup*100)}% for · ${Math.round(h.opp*100)}% against${ev}`;}
-  else $("#chartRead").innerHTML=`<span style="color:#c6ff3d">━ mean</span> <span style="color:#6be37a">━ % for</span> <span style="color:#ff5a5a">━ % against</span>`;
+  else $("#chartRead").innerHTML=`<span style="color:#c6ff3d">━ mean</span> <span style="color:#6be37a">━ % for</span> <span style="color:#ff5a5a">━ % against</span>${base?` <span style="color:#eef2eebb">┅ baseline mean</span>`:""}`;
   $("#chart").innerHTML=s;
 }
 $("#chart").addEventListener("pointermove",e=>{const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*CH.W;
-  const i=clamp(Math.round((x-CH.P)/(CH.W-CH.P*2)*(history.length-1)),0,history.length-1);drawChart(i);});
+  const i=clamp(Math.round((x-CH.P)/(CH.W-CH.P*2)*(CHL-1)),0,history.length-1);drawChart(i);});
 $("#chart").addEventListener("pointerleave",()=>drawChart(null));
 
 let lastTab="live";
 function refresh(skipSliders){
   updateStatus();
-  if(lastTab==="live"){renderFeed();if(!skipSliders)renderSel();}
+  if(lastTab==="live"){renderFeed();renderScrub();if(!skipSliders)renderSel();}
   if(lastTab==="personas"&&!skipSliders)renderPersonas();
   if(lastTab==="report")renderReport();
   if(lastTab==="chat"&&!skipSliders)renderPick();
@@ -532,8 +663,8 @@ function frame(){
     ctx.beginPath();ctx.moveTo(cx+a.x*S,cy+a.y*S);ctx.lineTo(cx+b.x*S,cy+b.y*S);ctx.stroke();}
   for(const a of agents){const px=cx+a.x*S,py=cy+a.y*S,rad=(3+a.inf*7)*dpr;
     ctx.globalAlpha=dim(a)?.18:1;
-    if(a.flash>.05){ctx.fillStyle=`rgba(198,255,61,${a.flash*.35})`;ctx.beginPath();ctx.arc(px,py,rad+10*dpr*a.flash,0,7);ctx.fill();}
-    ctx.fillStyle=colOf(a.op);ctx.beginPath();ctx.arc(px,py,rad,0,7);ctx.fill();
+    if(a.flash>.05&&viewRound==null){ctx.fillStyle=`rgba(198,255,61,${a.flash*.35})`;ctx.beginPath();ctx.arc(px,py,rad+10*dpr*a.flash,0,7);ctx.fill();}
+    ctx.fillStyle=colOf(opNow(a));ctx.beginPath();ctx.arc(px,py,rad,0,7);ctx.fill();
     if(a===selected||a===hoverA){ctx.strokeStyle="#fff";ctx.lineWidth=2*dpr;ctx.stroke();ctx.lineWidth=dpr*.7;}
     if((a.inf>.8&&!dim(a))||a===selected){ctx.fillStyle="#cfd6d0";ctx.font=`${11*dpr}px system-ui`;ctx.fillText(a.name.split(" ")[0],px+rad+3*dpr,py+4*dpr);}
     ctx.globalAlpha=1;
@@ -544,7 +675,7 @@ cv.addEventListener("pointerdown",e=>{const a=nodeAt(e);downAt=[e.clientX,e.clie
 cv.addEventListener("pointermove",e=>{
   if(drag){const [x,y]=toWorld(e);drag.x=clamp(x,-.5,.5);drag.y=clamp(y,-.5,.5);drag.vx=drag.vy=0;$("#tip").style.display="none";return;}
   const a=nodeAt(e);hoverA=a;const t=$("#tip");
-  if(a){const r=cv.getBoundingClientRect();t.style.display="block";t.innerHTML=`<b>${esc(a.name)}</b> · ${a.role}<br><span style="color:${colOf(a.op)}">${moodOf(a.op,a.emo)} ${sgn(a.op)}</span> · ${a.followers} followers`;
+  if(a){const r=cv.getBoundingClientRect();t.style.display="block";t.innerHTML=`<b>${esc(a.name)}</b> · ${a.role}<br><span style="color:${colOf(opNow(a))}">${moodOf(opNow(a),a.emo)} ${sgn(opNow(a))}</span> · ${a.followers} followers${viewRound!=null?` · round ${viewRound}`:""}`;
     const x=e.clientX-r.left+14;t.style.left=Math.min(x,r.width-t.offsetWidth-4)+"px";t.style.top=(e.clientY-r.top+12)+"px";}
   else t.style.display="none";});
 cv.addEventListener("pointerleave",()=>{hoverA=null;$("#tip").style.display="none";});
@@ -626,8 +757,12 @@ function download(name,text,type){const b=new Blob([text],{type}),u=URL.createOb
 const plain=s=>s.replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'");
 function reportMd(){renderReport();const s=history.at(-1);
   const li=id=>[...$(id).children].map(l=>"- "+plain(l.innerHTML.replace(/<\/span><span[^>]*>/," — ")).replace(/ →$/,"")).join("\n");
-  return`# Swarmcast forecast\n\n**Idea:** ${IDEA}\n\n${plain($("#verdict").innerHTML)}\n\n| Support | Undecided | Oppose |\n|---|---|---|\n| ${Math.round(s.sup*100)}% | ${Math.round((1-s.sup-s.opp)*100)}% | ${Math.round(s.opp*100)}% |\n\n## Top concerns\n${li("#concerns")}\n\n## Opinion leaders\n${li("#leaders")}\n\n## By group\n${li("#groups")}\n\n## Biggest shifts\n${li("#shifts")}\n\n## Events you injected\n${events.map(e=>`- round ${e.round}: ${plain(e.text)} (${e.tone>0?"good":"bad"} news, ${e.group})`).join("\n")||"- none"}\n\n_${agents.length} simulated agents, ${round} rounds, ${posts.length} posts. Simulated personas, not real people._\n`;}
-function shareLink(){const p=new URLSearchParams({idea:IDEA,a:agents.length,r:maxRounds});return location.href.split("#")[0]+"#"+p.toString();}
+  const r=readSummary(),m=mc&&mc.key===mcKey()?mc:null;
+  const readMd=`## How Swarmcast read the idea\n- Topics: ${r.doms.join(", ")||"none recognised"}\n- Framing: ${r.frame}\n- Hit hardest: ${r.against.join(", ")||"—"}\n- Most on board: ${r.forr.join(", ")||"—"}`;
+  const mcMd=m?`\n\n## How sure is this?\n- ${m.N} alternate crowds, ${m.rounds} rounds: support ${pc(m.p10)}–${pc(m.p90)} (10th–90th percentile), median ${pc(m.p50)}\n- Support beat opposition in ${m.wins} of ${m.N} crowds`:"";
+  const cmpMd=baseline&&baseline.id!==runId()?`\n\n## Versus baseline\n- Baseline: ${baseline.idea} — ${pc(baseline.sup)} for, ${pc(baseline.opp)} against\n- This run: ${IDEA} — ${pc(s.sup)} for, ${pc(s.opp)} against`:"";
+  return`# Swarmcast forecast\n\n**Idea:** ${IDEA}\n\n${plain($("#verdict").innerHTML)}\n\n| Support | Undecided | Oppose |\n|---|---|---|\n| ${Math.round(s.sup*100)}% | ${Math.round((1-s.sup-s.opp)*100)}% | ${Math.round(s.opp*100)}% |\n\n${readMd}${mcMd}${cmpMd}\n\n## Top concerns\n${li("#concerns")}\n\n## Opinion leaders\n${li("#leaders")}\n\n## By group\n${li("#groups")}\n\n## Biggest shifts\n${li("#shifts")}\n\n## Events you injected\n${events.map(e=>`- round ${e.round}: ${plain(e.text)} (${e.tone>0?"good":"bad"} news, ${e.group})`).join("\n")||"- none"}\n\n_${agents.length} simulated agents, ${round} rounds, ${posts.length} posts. Simulated personas, not real people._\n`;}
+function shareLink(){const p=new URLSearchParams({idea:IDEA,a:agents.length,r:maxRounds});if(curSalt)p.set("s",curSalt);return location.href.split("#")[0]+"#"+p.toString();}
 
 /* ---------- wiring ---------- */
 function showTab(t){lastTab=t;$$(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$$("[data-p]").forEach(p=>p.classList.toggle("hide",p.dataset.p!==t));
@@ -640,7 +775,8 @@ $("#evGroup").innerHTML=["All",...GROUPS].map(g=>`<option>${g}</option>`).join("
 $("#pg").innerHTML=["All",...GROUPS].map(g=>`<option>${g}</option>`).join("");
 
 function start(idea,n,r,salt=0){
-  maxRounds=r;build(idea,n,salt);selected=null;hiGroup=null;Object.assign(filt,{mood:null,q:"",concern:null,author:null});$("#fq").value="";
+  clearInterval(replayT);replayT=null;viewRound=null;mc=null;curSalt=salt;
+  maxRounds=r;build(idea,n,salt);selected=null;renderRead();hiGroup=null;Object.assign(filt,{mood:null,q:"",concern:null,author:null});$("#fq").value="";
   $("#landing").style.display="none";$("#app").style.display="block";$("#qText").textContent="“"+idea+"”";
   $("#pause").disabled=false;$("#pause").textContent="Pause";paused=false;speed=+$("#speed").value;
   chatMode="one";setMode("one");renderGChips();showTab("live");
@@ -649,7 +785,8 @@ function start(idea,n,r,salt=0){
 }
 $("#run").onclick=()=>{const idea=$("#idea").value.trim()||EXAMPLES[0];$("#idea").value=idea;start(idea,+$("#nAgents").value,+$("#nRounds").value);};
 $("#idea").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))$("#run").click();});
-$("#pause").onclick=()=>{paused=!paused;$("#pause").textContent=paused?"Resume":"Pause";};
+$("#pause").onclick=()=>{if(replayT){clearInterval(replayT);replayT=null;}paused=!paused;$("#pause").textContent=paused?"Resume":"Pause";
+  if(!paused&&viewRound!=null)setView(null);else if(lastTab==="report")renderReport();};
 $("#stepBtn").onclick=()=>{if(finished)extend(1);paused=true;$("#pause").textContent="Resume";step();};
 $("#more").onclick=()=>{extend(10);toast("+10 rounds");};
 $("#speed").onchange=e=>{speed=+e.target.value;tick();};
@@ -658,11 +795,16 @@ $("#evGo").onclick=()=>{injectEvent($("#evText").value,+$("#evTone").value,$("#e
 $("#evText").addEventListener("keydown",e=>{if(e.key==="Enter")$("#evGo").click();});
 $("#share").onclick=async()=>{const l=shareLink();try{await navigator.clipboard.writeText(l);toast("Link copied");}catch{prompt("Copy this link:",l);}};
 $("#expMd").onclick=()=>download("swarmcast-report.md",reportMd(),"text/markdown");
-$("#expJson").onclick=()=>download("swarmcast-data.json",JSON.stringify({idea:IDEA,rounds:round,history,events:events.map(e=>({...e,text:plain(e.text)})),
+$("#expJson").onclick=()=>download("swarmcast-data.json",JSON.stringify({idea:IDEA,rounds:round,reading:(({frame,doms,against,forr})=>({frame,topics:doms,hitHardest:against,mostOnBoard:forr}))(readSummary()),alternateCrowds:mc&&mc.key===mcKey()?{n:mc.N,p10:mc.p10,p50:mc.p50,p90:mc.p90,supportWins:mc.wins}:null,history:history.map(({ops,...h})=>h),events:events.map(e=>({...e,text:plain(e.text)})),
   agents:agents.map(a=>({name:a.name,role:a.role,group:a.group,start:+a.op0.toFixed(3),end:+a.op.toFixed(3),influence:+a.inf.toFixed(2),posts:a.posts,reach:a.reach,concerns:a.concerns})),
   posts:posts.map(p=>({round:p.round,author:p.by==null?"news":agents[p.by].name,mood:p.mood,text:plain(p.text),likes:p.likes}))},null,2),"application/json");
 $("#rerun").onclick=()=>{start(IDEA,agents.length,Math.max(5,maxRounds),Math.floor(Math.random()*1e9));toast("New random crowd, same idea");};
-const goHome=()=>{clearTimeout(timer);cancelAnimationFrame(raf);agents=[];$("#app").style.display="none";$("#landing").style.display="block";window.history.replaceState(null,"",location.href.split("#")[0]);};
+const goHome=()=>{clearTimeout(timer);cancelAnimationFrame(raf);clearInterval(replayT);replayT=null;viewRound=null;agents=[];$("#app").style.display="none";$("#landing").style.display="block";renderRecent();window.history.replaceState(null,"",location.href.split("#")[0]);};
+$("#replay").onclick=startReplay;
+$("#scrub").oninput=e=>{if(replayT){clearInterval(replayT);replayT=null;}if(!paused&&!finished){paused=true;$("#pause").textContent="Resume";}setView(+e.target.value);};
+$("#recentList").onclick=e=>{const b=e.target.closest("[data-recent]");if(!b)return;const r=LS.get("swarmcast.recent",[])[+b.dataset.recent];if(!r)return;
+  const n=clamp(+r.a||48,20,90),k=clamp(+r.r||20,5,200);$("#idea").value=r.idea;$("#nAgents").value=n;$("#oAgents").textContent=n;start(String(r.idea).slice(0,280),n,k);};
+renderRecent();
 $("#restart").onclick=goHome;$("#home").onclick=goHome;
 $("#relayout").onclick=()=>layout();
 
@@ -681,6 +823,10 @@ document.addEventListener("change",e=>{if(e.target.dataset?.nudge!=null){toast("
 document.addEventListener("click",e=>{
   const t=e.target;
   if(t.dataset?.nudge!=null)return;
+  if(t.id==="goLive"){setView(null);return;}
+  if(t.id==="mcRun"){monteCarlo();renderReport();toast("40 alternate crowds simulated");return;}
+  if(t.id==="pinBase"){pinBaseline();return;}
+  if(t.id==="clearBase"){baseline=null;LS.set("swarmcast.baseline",null);toast("Baseline cleared");renderReport();return;}
   if(t.id==="clearF"){Object.assign(filt,{concern:null,author:null});renderFeed();return;}
   if(t.dataset?.boost){boost(posts.find(p=>p.id===+t.dataset.boost));return;}
   if(t.dataset?.act){const a=selected;if(t.dataset.act==="interview"){selectAgent(a);showTab("chat");}
@@ -692,12 +838,12 @@ document.addEventListener("click",e=>{
   const c=t.closest(".pcard");if(c){selectAgent(agents[+c.dataset.id]);showTab("chat");}
 });
 document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,select")||!agents.length)return;
-  if(e.key===" "){e.preventDefault();$("#pause").click();}else if(e.key==="n"||e.key==="N")$("#stepBtn").click();else if(e.key==="e"||e.key==="E")$("#evBtn").click();});
+  if(e.key===" "){e.preventDefault();$("#pause").click();}else if(e.key==="n"||e.key==="N")$("#stepBtn").click();else if(e.key==="e"||e.key==="E")$("#evBtn").click();else if((e.key==="r"||e.key==="R")&&lastTab==="live")startReplay();});
 
 // shared link: #idea=...&a=..&r=..
 const hp=new URLSearchParams(location.hash.slice(1));
 if(hp.get("idea")){const idea=hp.get("idea").slice(0,280);$("#idea").value=idea;
-  const n=clamp(+hp.get("a")||48,20,90),r=clamp(+hp.get("r")||20,5,200);$("#nAgents").value=n;$("#oAgents").textContent=n;start(idea,n,r);}
+  const n=clamp(+hp.get("a")||48,20,90),r=clamp(+hp.get("r")||20,5,200);$("#nAgents").value=n;$("#oAgents").textContent=n;start(idea,n,r,Math.floor(Math.abs(+hp.get("s")||0))%1e9);}
 })();
 </script>
 </body>
